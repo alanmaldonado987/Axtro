@@ -5,7 +5,7 @@ import moment from 'moment'
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
-  const { chats, setSelectedChat, theme, setTheme, user, navigate } = useAppContext()
+  const { chats, setSelectedChat, theme, setTheme, user, navigate, logout } = useAppContext()
   const [search, setSearch] = useState('')
 
   return (
@@ -82,7 +82,16 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       <div className='flex items-center gap-2 p-3 mt-4 border border-gray-300 dark:border-white/15 rounder-md cursor-pointer'>
         <img src={assets.user_icon} className='w-7 rounder-full' alt="" />
         <p className='flex-1 text-sm dark:text-primary truncate'>{user ? user.name : 'Login your account'}</p>
-        { user && <img src={assets.logout_icon} className='h-5 cursor-pointer not-dark:invert group-hover:block' /> }
+        { user && <img 
+          src={assets.logout_icon} 
+          className='h-5 cursor-pointer not-dark:invert hover:opacity-70 transition-opacity' 
+          alt="Cerrar sesión"
+          onClick={(e) => {
+            e.stopPropagation();
+            logout();
+          }}
+          title="Cerrar sesión"
+        /> }
       </div>
 
       <img onClick={()=>setIsMenuOpen(false)} src={assets.close_icon} className='hidden max-md:block absolute top-3 right-3 w-5 h-5 cursor-pointer not-dark:invert' alt="" />

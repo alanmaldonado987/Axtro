@@ -17,6 +17,13 @@ userSchema.pre('save', async function (next) {
     next();
 })
 
+// Excluir password al convertir a JSON
+userSchema.methods.toJSON = function() {
+    const userObject = this.toObject();
+    delete userObject.password;
+    return userObject;
+}
+
 const User = mongoose.model('User', userSchema)
 
 export default User;

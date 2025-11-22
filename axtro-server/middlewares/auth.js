@@ -5,6 +5,17 @@ export const protect = async (req, res, next) => {
     let token = req.headers.authorization;
 
     try {
+        if (token && token.startsWith('Bearer ')) {
+            token = token.substring(7);
+        }
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: "No cuenta con autorización, token no proporcionado"
+            })
+        }
+
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const userId = decoded.id;
 
@@ -12,7 +23,7 @@ export const protect = async (req, res, next) => {
 
         if(!user){
             return res.json({
-                sucess: false,
+                success: false,
                 message: "No cuenta con autorización, usuario no encontrado"
             })
         }
@@ -21,6 +32,7 @@ export const protect = async (req, res, next) => {
         next()
     } catch (error) {
         res.status(401).json({
+            success: false,
             message: "No cuenta con autorización, token fallido"
         })
     }

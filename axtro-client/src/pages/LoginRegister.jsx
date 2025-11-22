@@ -1,9 +1,123 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaGooglePlusG, FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { authService } from "../services/authService";
+import { useAppContext } from "../context/AppContext";
 
 const LoginRegister = () => {
 
   const [active, setActive] = useState(false);
+  const { setUser } = useAppContext();
+
+  // Estados para el formulario de registro
+  const [registerData, setRegisterData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+
+  // Estados para el formulario de login
+  const [loginData, setLoginData] = useState({
+    email: '',
+    password: ''
+  });
+
+  // Estados para errores y carga
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Manejar registro
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    if (!registerData.name || !registerData.email || !registerData.password) {
+      setError('Por favor completa todos los campos');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await authService.register(
+        registerData.name,
+        registerData.email,
+        registerData.password
+      );
+
+      if (response.success) {
+        // Guardar el email antes de limpiar para pasarlo al login
+        const registeredEmail = registerData.email;
+        
+        // Mostrar mensaje de éxito
+        setSuccess('Usuario creado exitosamente. Por favor inicia sesión.');
+        // Limpiar formulario de registro
+        setRegisterData({
+          name: '',
+          email: '',
+          password: ''
+        });
+        // Cambiar a vista de login después de 2 segundos y copiar el email
+        setTimeout(() => {
+          setActive(false);
+          setSuccess('');
+          setLoginData({
+            ...loginData,
+            email: registeredEmail
+          });
+        }, 2000);
+      } else {
+        setError(response.message || 'Error al registrar usuario');
+      }
+    } catch (err) {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Manejar login
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (!loginData.email || !loginData.password) {
+      setError('Por favor completa todos los campos');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await authService.login(
+        loginData.email,
+        loginData.password
+      );
+
+      if (response.success && response.token) {
+        authService.saveToken(response.token);
+        
+        // Obtener datos del usuario
+        const userResponse = await authService.getUserData();
+        if (userResponse.success) {
+          setUser(userResponse.user);
+        }
+      } else {
+        setError(response.message || 'Error al iniciar sesión');
+      }
+    } catch (err) {
+      setError('Error al conectar con el servidor');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Limpiar error y éxito cuando se cambia entre login y register
+  useEffect(() => {
+    setError('');
+    setSuccess('');
+  }, [active]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-blue-50">
@@ -29,11 +143,49 @@ const LoginRegister = () => {
 
           <span className="text-xs text-gray-600 mb-4">o usa tu correo para registrarte</span>
 
-          <input type="text" placeholder="Nombre" className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-3 text-sm outline-none focus:bg-gray-200 transition" />
-          <input type="email" placeholder="Correo Electrónico" className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-3 text-sm outline-none focus:bg-gray-200 transition" />
-          <input type="password" placeholder="Contraseña" className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-4 text-sm outline-none focus:bg-gray-200 transition" />
+          {error && active && (
+            <div className="w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg mb-3 text-xs">
+              {error}
+            </div>
+          )}
 
-          <button className="bg-purple-600 text-white font-semibold px-10 py-3 rounded-lg text-sm uppercase tracking-wider hover:bg-purple-700 transition">Registrarse</button>
+          {success && active && (
+            <div className="w-full bg-green-100 text-green-700 px-4 py-2 rounded-lg mb-3 text-xs">
+              {success}
+            </div>
+          )}
+
+          <form onSubmit={handleRegister} className="w-full">
+            <input 
+              type="text" 
+              placeholder="Nombre" 
+              value={registerData.name}
+              onChange={(e) => setRegisterData({...registerData, name: e.target.value})}
+              className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-3 text-sm outline-none focus:bg-gray-200 transition" 
+            />
+            <input 
+              type="email" 
+              placeholder="Correo Electrónico" 
+              value={registerData.email}
+              onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
+              className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-3 text-sm outline-none focus:bg-gray-200 transition" 
+            />
+            <input 
+              type="password" 
+              placeholder="Contraseña" 
+              value={registerData.password}
+              onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+              className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-4 text-sm outline-none focus:bg-gray-200 transition" 
+            />
+
+            <button 
+              type="submit"
+              disabled={loading}
+              className="bg-purple-600 text-white font-semibold px-10 py-3 rounded-lg text-sm uppercase tracking-wider hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed w-full"
+            >
+              {loading ? 'Registrando...' : 'Registrarse'}
+            </button>
+          </form>
         </div>
 
         {/* SIGN IN */}
@@ -53,12 +205,38 @@ const LoginRegister = () => {
 
           <span className="text-xs text-gray-600 mb-4">o usa tu correo y contraseña</span>
 
-          <input type="email" placeholder="Correo Electrónico" className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-3 text-sm outline-none focus:bg-gray-200 transition" />
-          <input type="password" placeholder="Contraseña" className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-2 text-sm outline-none focus:bg-gray-200 transition" />
+          {error && !active && (
+            <div className="w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg mb-3 text-xs">
+              {error}
+            </div>
+          )}
 
-          <a href="#" className="text-xs text-gray-600 hover:text-gray-800 mb-4">¿Olvidaste tu contraseña?</a>
+          <form onSubmit={handleLogin} className="w-full">
+            <input 
+              type="email" 
+              placeholder="Correo Electrónico" 
+              value={loginData.email}
+              onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+              className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-3 text-sm outline-none focus:bg-gray-200 transition" 
+            />
+            <input 
+              type="password" 
+              placeholder="Contraseña" 
+              value={loginData.password}
+              onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+              className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-2 text-sm outline-none focus:bg-gray-200 transition" 
+            />
 
-          <button className="bg-purple-600 text-white font-semibold px-10 py-3 rounded-lg text-sm uppercase tracking-wider hover:bg-purple-700 transition">Iniciar Sesión</button>
+            <a href="#" className="text-xs text-gray-600 hover:text-gray-800 mb-4">¿Olvidaste tu contraseña?</a>
+
+            <button 
+              type="submit"
+              disabled={loading}
+              className="bg-purple-600 text-white font-semibold px-10 py-3 rounded-lg text-sm uppercase tracking-wider hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed w-full"
+            >
+              {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+            </button>
+          </form>
         </div>
 
         {/* RIGHT PANEL */}

@@ -14,7 +14,7 @@ export const registerUSer = async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
-        userExist = await User.findOne({email})
+        const userExist = await User.findOne({email})
 
         if (userExist){
             return res.json({
@@ -34,7 +34,7 @@ export const registerUSer = async (req, res) => {
 
     } catch (error) {
         return res.json({
-            sucess: false,
+            success: false,
             message: error.message
         })
     }
@@ -52,18 +52,22 @@ export const loginUser = async (req, res) => {
             if(isMatch){
                 const token = generateToken(user._id)
                 return res.json({
-                    sucess: true,
+                    success: true,
                     token
                 })
             }
             return res.json({
-                sucess: false,
+                success: false,
                 message: "Correo o contraseña inválida"
             })
         }
+        return res.json({
+            success: false,
+            message: "Correo o contraseña inválida"
+        })
     } catch (error) {
         return res.json({
-            sucess: false,
+            success: false,
             message: error.message
         })
     }
@@ -79,7 +83,7 @@ export const getUser = async(req, res) => {
         })
     } catch (error) {
         return res.json({
-            sucess: false,
+            success: false,
             message: error.message
         })
     }
