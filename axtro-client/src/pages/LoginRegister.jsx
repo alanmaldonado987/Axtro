@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FaGooglePlusG, FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa";
 import { authService } from "../services/authService";
 import { useAppContext } from "../context/AppContext";
@@ -25,6 +25,8 @@ const LoginRegister = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loginTransitioning, setLoginTransitioning] = useState(false);
+  const transitionTimeoutRef = useRef(null);
 
   // Manejar registro
   const handleRegister = async (e) => {
@@ -97,12 +99,27 @@ const LoginRegister = () => {
 
       if (response.success && response.token) {
         authService.saveToken(response.token);
-        
-        // Obtener datos del usuario
-        const userResponse = await authService.getUserData();
-        if (userResponse.success) {
-          setUser(userResponse.user);
+
+        if (transitionTimeoutRef.current) {
+          clearTimeout(transitionTimeoutRef.current);
         }
+
+        setLoginTransitioning(true);
+
+        transitionTimeoutRef.current = setTimeout(async () => {
+          try {
+            const userResponse = await authService.getUserData();
+            if (userResponse.success) {
+              setUser(userResponse.user);
+            } else {
+              setError(userResponse.message || 'No se pudo obtener la información del usuario');
+            }
+          } catch (fetchError) {
+            setError('No pudimos sincronizar tus datos, intenta nuevamente.');
+          } finally {
+            setLoginTransitioning(false);
+          }
+        }, 4000);
       } else {
         setError(response.message || 'Error al iniciar sesión');
       }
@@ -119,8 +136,28 @@ const LoginRegister = () => {
     setSuccess('');
   }, [active]);
 
+  useEffect(() => {
+    return () => {
+      if (transitionTimeoutRef.current) {
+        clearTimeout(transitionTimeoutRef.current);
+      }
+    }
+  }, [])
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-blue-50">
+      {loginTransitioning && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6 bg-[#0F0618]/85 backdrop-blur-xl text-white transition-opacity">
+          <div className="uppercase tracking-[0.4em] text-xs text-[#D8C8FF]">cargando</div>
+          <div className="relative w-36 h-36">
+            <div className="absolute inset-0 border-2 border-transparent rounded-full border-t-[#8A5BFF] animate-spin-slow"></div>
+            <div className="absolute inset-3 border-2 border-transparent rounded-full border-b-[#E5D6FF] animate-spin-slower"></div>
+            <div className="absolute inset-6 bg-gradient-to-br from-[#7C3AED] to-[#C084FC] rounded-full blur-2xl opacity-80 animate-pulse-fast"></div>
+          </div>
+          <p className="text-2xl font-semibold">Preparando tu espacio creativo...</p>
+          <p className="text-sm text-[#D8C8FF]/80">Sincronizando tus chats, preferencias y atajos favoritos.</p>
+        </div>
+      )}
       <div
         className={`relative bg-white rounded-3xl shadow-2xl overflow-hidden w-[850px] max-w-[95vw] h-[550px] transition-all duration-700 ${
           active ? "active" : ""

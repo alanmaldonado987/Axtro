@@ -51,6 +51,41 @@
   animation-delay: 0.4s;
 }
 
+.animate-spin-slow{
+  animation: spin-slow 2.5s linear infinite;
+}
+
+.animate-spin-slower{
+  animation: spin-slower 3.5s linear infinite;
+}
+
+.animate-pulse-fast{
+  animation: pulse-fast 2s ease-in-out infinite;
+}
+
+@keyframes spin-slow{
+  to{
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-slower{
+  to{
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes pulse-fast{
+  0%, 100%{
+    transform: scale(0.95);
+    opacity: 0.6;
+  }
+  50%{
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
 .swal2-rounded{
   border-radius: 1.5rem !important;
   padding: 2.5rem 2rem !important;
