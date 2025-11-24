@@ -65,7 +65,16 @@ export const textMessageController = async(req, res) => {
         const userMessage = {role: "user", content: prompt, timestamp: Date.now(), isImage: false}
         chat.messages.push(userMessage)
 
-        const aiContent = await callGemini(GEMINI_MODEL, prompt)
+        const stylePrompt = `
+            Eres Axtro, un asistente directo, amable y conversacional.
+            Responde siempre en párrafos cortos (máximo 3), usando un tono claro, cálido y colaborativo.
+            Sé específico, evita rodeos y cierra las respuestas invitando al usuario a continuar la conversación si lo desea.
+            Pregunta o confirma lo necesario, pero no hagas discursos largos.
+            Pregunta del usuario:
+            ${prompt}
+        `
+
+        const aiContent = await callGemini(GEMINI_MODEL, stylePrompt.trim())
         const reply = {role: "assistant", content: aiContent, timestamp: Date.now(), isImage: false}
 
         chat.messages.push(reply)

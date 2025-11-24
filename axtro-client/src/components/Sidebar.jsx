@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import Swal from 'sweetalert2'
 import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
-import moment from 'moment'
+import moment from 'moment/min/moment-with-locales'
 import { chatService } from '../services/chatService'
+
+moment.locale('es')
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
@@ -144,7 +146,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                   {chat.messages.length > 0 ? chat.messages[0].content.slice(0,32) : chat.name}
                 </p>
                 <p className='text-xs text-[#8C7AB5] dark:text-[#B1A6C0]'>
-                  {moment(chat.updatedAt).fromNow()}
+                  {moment(chat.updatedAt).locale('es').fromNow()}
                 </p>
               </div>
               <img
