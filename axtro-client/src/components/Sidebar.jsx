@@ -242,7 +242,13 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           onClick={handleUserMenuClick}
           className='flex items-center gap-2 p-3 mt-4 border border-[#D8C8FF] dark:border-[#3B2A4F] rounded-md cursor-pointer bg-white/40 dark:bg-[#20152E] hover:bg-white/60 dark:hover:bg-[#2A1B3A] transition-colors'
         >
-          <img src={assets.user_icon} className='w-7 rounded-full' alt="" />
+          {user?.profilePicture ? (
+            <img src={user.profilePicture} className='w-7 h-7 rounded-full object-cover' alt="Usuario" />
+          ) : (
+            <div className='w-7 h-7 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#9B5CFF] flex items-center justify-center text-white text-xs font-bold'>
+              {user?.name ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) : 'U'}
+            </div>
+          )}
           <p className='flex-1 text-sm text-[#4C1D95] dark:text-[#E6CCFF] truncate'>{user ? user.name : 'Login your account'}</p>
           { user && <img 
             src={assets.logout_icon} 

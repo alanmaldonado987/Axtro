@@ -6,10 +6,31 @@ import Prism from 'prismjs'
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import rehypePrism from "rehype-prism-plus";
+import { useAppContext } from '../context/AppContext'
 
 moment.locale('es')
 
 const Message = ({ message }) => {
+  const { user } = useAppContext()
+
+  // Obtener iniciales del nombre
+  const getInitials = (name) => {
+    if (!name) return 'U'
+    return name
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2)
+  }
+
+  // Obtener avatar del usuario
+  const getUserAvatar = () => {
+    if (user?.profilePicture) {
+      return user.profilePicture
+    }
+    return null
+  }
 
   useEffect(()=>{
     Prism.highlightAll();
@@ -23,7 +44,13 @@ const Message = ({ message }) => {
             <p className='text-sm text-[#2F1B45] dark:text-white leading-relaxed'>{message.content}</p>
             <span className='text-xs text-[#9A8AB8] dark:text-[#D4C8F2]'>{moment(message.timestamp).locale('es').fromNow()}</span>
           </div>
-          <img src={assets.user_icon} className='w-8 rounded-full' alt="" />
+          {getUserAvatar() ? (
+            <img src={getUserAvatar()} className='w-8 h-8 rounded-full object-cover' alt="Usuario" />
+          ) : (
+            <div className='w-8 h-8 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#9B5CFF] flex items-center justify-center text-white text-xs font-bold'>
+              {getInitials(user?.name)}
+            </div>
+          )}
         </div>
       )
       :

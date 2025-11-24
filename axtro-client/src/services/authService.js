@@ -83,5 +83,25 @@ export const authService = {
   removeToken() {
     localStorage.removeItem('token');
   },
+
+  /**
+   * Actualiza el perfil del usuario
+   * @param {object} profileData - Datos del perfil a actualizar
+   * @param {string} profileData.name - Nombre para mostrar
+   * @param {string} profileData.username - Nombre de usuario
+   * @param {string} profileData.profilePicture - Foto de perfil (base64 o URL)
+   * @returns {Promise<{success: boolean, user?: object, message?: string}>}
+   */
+  async updateProfile(profileData) {
+    try {
+      const response = await axiosClient.put('/user/update', profileData);
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al actualizar el perfil',
+      };
+    }
+  },
 };
 

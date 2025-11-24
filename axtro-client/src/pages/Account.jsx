@@ -1,35 +1,24 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { FaCamera } from 'react-icons/fa'
 import { useAppContext } from '../context/AppContext'
+import { authService } from '../services/authService'
 
 const Account = () => {
-  const { user, setUser, navigate } = useAppContext()
+  const { user, setUser, navigate, fetchUser } = useAppContext()
   const [formData, setFormData] = useState({
     displayName: '',
     username: ''
   })
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const fileInputRef = useRef(null)
 
   useEffect(() => {
     if (user) {
-      // Obtener iniciales del nombre
-      const initials = user.name
-        ? user.name
-            .split(' ')
-            .map(n => n[0])
-            .join('')
-            .toUpperCase()
-            .slice(0, 2)
-        : 'U'
-      
-      // Generar username desde el email si no existe
-      const usernameFromEmail = user.email
-        ? user.email.split('@')[0]
-        : ''
-
       setFormData({
         displayName: user.name || '',
-        username: usernameFromEmail
+        username: user.username || (user.email ? user.email.split('@')[0] : '')
       })
     }
   }, [user])
@@ -44,24 +33,79 @@ const Account = () => {
 
   const handleSave = async () => {
     setLoading(true)
-    // TODO: Implementar actualización en el backend
-    // Por ahora solo actualizamos el estado local
+    setError('')
+    setSuccess('')
+    
     try {
-      // Aquí iría la llamada al API cuando esté implementado
-      // const response = await authService.updateProfile(formData)
+      const response = await authService.updateProfile({
+        name: formData.displayName,
+        username: formData.username
+      })
       
-      // Simulación de actualización
-      setTimeout(() => {
-        if (user) {
-          setUser({
-            ...user,
-            name: formData.displayName
-          })
-        }
-        setLoading(false)
-      }, 500)
+      if (response.success) {
+        setSuccess('Perfil actualizado correctamente')
+        // Actualizar el usuario en el contexto
+        await fetchUser()
+        setTimeout(() => {
+          navigate('/')
+        }, 1500)
+      } else {
+        setError(response.message || 'Error al actualizar el perfil')
+      }
     } catch (error) {
       console.error('Error al actualizar perfil:', error)
+      setError('Error al conectar con el servidor')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+
+    // Validar que sea una imagen
+    if (!file.type.startsWith('image/')) {
+      setError('Por favor selecciona un archivo de imagen')
+      return
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La imagen debe ser menor a 5MB')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+    
+    try {
+      // Convertir a base64
+      const reader = new FileReader()
+      reader.onloadend = async () => {
+        try {
+          const base64Image = reader.result
+          const response = await authService.updateProfile({
+            profilePicture: base64Image
+          })
+          
+          if (response.success) {
+            setSuccess('Foto de perfil actualizada correctamente')
+            await fetchUser()
+          } else {
+            setError(response.message || 'Error al actualizar la foto de perfil')
+          }
+        } catch (error) {
+          console.error('Error al actualizar foto:', error)
+          setError('Error al subir la foto de perfil')
+        } finally {
+          setLoading(false)
+        }
+      }
+      reader.readAsDataURL(file)
+    } catch (error) {
+      console.error('Error al procesar imagen:', error)
+      setError('Error al procesar la imagen')
       setLoading(false)
     }
   }
@@ -74,9 +118,11 @@ const Account = () => {
         : ''
       setFormData({
         displayName: user.name || '',
-        username: usernameFromEmail
+        username: user.username || (user.email ? user.email.split('@')[0] : '')
       })
     }
+    setError('')
+    setSuccess('')
     // Redirigir a la página principal
     navigate('/')
   }
@@ -95,6 +141,9 @@ const Account = () => {
         .toUpperCase()
         .slice(0, 2)
     : 'U'
+
+  // Usar foto de perfil si existe, sino mostrar iniciales
+  const profileImage = user.profilePicture
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#F7F4FF] dark:bg-[#0F0618] p-4">
@@ -118,20 +167,45 @@ const Account = () => {
             {/* Foto de perfil */}
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#9B5CFF] flex items-center justify-center text-white text-4xl font-bold shadow-lg">
-                  {initials}
-                </div>
+                {profileImage ? (
+                  <img 
+                    src={profileImage} 
+                    alt="Foto de perfil" 
+                    className="w-28 h-28 rounded-full object-cover shadow-lg"
+                  />
+                ) : (
+                  <div className="w-28 h-28 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#9B5CFF] flex items-center justify-center text-white text-4xl font-bold shadow-lg">
+                    {initials}
+                  </div>
+                )}
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
                 <button
                   className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-white dark:bg-[#2B1B3D] border-2 border-white dark:border-[#3B2A4F] flex items-center justify-center text-[#1C1426] dark:text-[#E6CCFF] hover:bg-[#F0E9FF] dark:hover:bg-[#3B2A4F] transition-colors cursor-pointer shadow-lg"
-                  onClick={() => {
-                    // TODO: Implementar cambio de foto
-                    console.log('Cambiar foto de perfil')
-                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={loading}
                 >
                   <FaCamera className="w-4 h-4" />
                 </button>
               </div>
             </div>
+
+            {/* Mensajes de error y éxito */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm">
+                {success}
+              </div>
+            )}
 
             {/* Campos de formulario */}
             <div className="space-y-4 mb-6">
@@ -166,7 +240,7 @@ const Account = () => {
 
             {/* Texto descriptivo */}
             <p className="text-sm text-[#6B4AA6] dark:text-[#CFC0E6] mb-6 text-center">
-              Tu perfil ayuda a que las personas te reconozcan. Tu nombre y nombre de usuario también se utilizan en la aplicación de Sora.
+              Tu perfil ayuda a que las personas te reconozcan.
             </p>
 
             {/* Botones */}

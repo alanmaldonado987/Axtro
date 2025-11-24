@@ -105,7 +105,7 @@ const Information = ({ isOpen, onClose }) => {
                     <FiLinkedin className='text-[#4C1D95] dark:text-[#E6CCFF] text-lg group-hover:text-[#7C3AED] transition-colors' />
                   </a>
                   <a
-                    href=''
+                    href='https://www.instagram.com/alandmv.ssj/'
                     target='_blank'
                     rel='noopener noreferrer'
                     className='p-2.5 bg-[#F1E6FF] dark:bg-[#3A2751] hover:bg-[#E5D9FF] dark:hover:bg-[#4A2C67] rounded-lg transition-colors group'

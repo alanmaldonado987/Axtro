@@ -37,41 +37,41 @@ const Configuration = () => {
 
   const renderGeneralSettings = () => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Aspecto */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
-          <span className="text-[#1C1426] dark:text-[#E6CCFF] font-medium">Aspecto</span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
+          <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Aspecto</span>
           <div className="flex items-center gap-2">
-            <span className="text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.aspecto}</span>
+            <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.aspecto}</span>
             <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
           </div>
         </div>
 
         {/* Color de acento */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
-          <span className="text-[#1C1426] dark:text-[#E6CCFF] font-medium">Color de acento</span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
+          <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Color de acento</span>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-gray-400 border border-gray-300"></div>
-            <span className="text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.colorAcento}</span>
+            <div className="w-4 h-4 rounded-full bg-gray-400 border border-gray-300 flex-shrink-0"></div>
+            <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.colorAcento}</span>
             <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
           </div>
         </div>
 
         {/* Idioma */}
-        <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
-          <span className="text-[#1C1426] dark:text-[#E6CCFF] font-medium">Idioma</span>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
+          <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Idioma</span>
           <div className="flex items-center gap-2">
-            <span className="text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.idioma}</span>
+            <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.idioma}</span>
             <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
           </div>
         </div>
 
         {/* Idioma hablado */}
         <div className="py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[#1C1426] dark:text-[#E6CCFF] font-medium">Idioma hablado</span>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+            <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Idioma hablado</span>
             <div className="flex items-center gap-2">
-              <span className="text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.idiomaHablado}</span>
+              <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.idiomaHablado}</span>
               <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
             </div>
           </div>
@@ -81,15 +81,15 @@ const Configuration = () => {
         </div>
 
         {/* Voz */}
-        <div className="flex items-center justify-between py-3">
-          <span className="text-[#1C1426] dark:text-[#E6CCFF] font-medium">Voz</span>
-          <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6931C9] transition-colors cursor-pointer">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3">
+          <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Voz</span>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            <button className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6931C9] transition-colors cursor-pointer">
               <FiPlay className="w-3.5 h-3.5" />
-              <span className="text-sm font-medium">Reproducir</span>
+              <span className="text-xs sm:text-sm font-medium">Reproducir</span>
             </button>
             <div className="flex items-center gap-2">
-              <span className="text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.voz}</span>
+              <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.voz}</span>
               <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
             </div>
           </div>
@@ -123,27 +123,30 @@ const Configuration = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 dark:bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 dark:bg-black/60 backdrop-blur-sm p-2 sm:p-4"
       onClick={handleClose}
     >
       <div 
-        className="bg-white dark:bg-[#1C1426] rounded-2xl shadow-2xl w-full max-w-4xl h-[80vh] max-h-[700px] flex overflow-hidden animate-fade-in"
+        className="bg-white dark:bg-[#1C1426] rounded-2xl shadow-2xl w-full max-w-4xl h-[95vh] sm:h-[90vh] md:h-[80vh] max-h-[700px] flex flex-col md:flex-row overflow-hidden animate-fade-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Sidebar izquierdo */}
-        <div className="w-64 bg-white dark:bg-[#2B1B3D] border-r border-gray-200 dark:border-[#3B2A4F] flex flex-col">
-          {/* Botón cerrar */}
-          <div className="p-4 border-b border-gray-200 dark:border-[#3B2A4F]">
+        <div className="w-full md:w-64 bg-white dark:bg-[#2B1B3D] border-b md:border-b-0 md:border-r border-gray-200 dark:border-[#3B2A4F] flex flex-col max-h-[40vh] md:max-h-none">
+          {/* Botón cerrar y título en móvil */}
+          <div className="p-4 border-b border-gray-200 dark:border-[#3B2A4F] flex items-center justify-between">
+            <h2 className="text-lg font-bold text-[#4C1D95] dark:text-[#E6CCFF] md:hidden">
+              {menuItems.find(item => item.id === activeSection)?.label || 'General'}
+            </h2>
             <button
               onClick={handleClose}
-              className="text-[#4C1D95] dark:text-[#E6CCFF] hover:text-[#7C3AED] dark:hover:text-[#9B5CFF] transition-colors cursor-pointer"
+              className="text-[#4C1D95] dark:text-[#E6CCFF] hover:text-[#7C3AED] dark:hover:text-[#9B5CFF] transition-colors cursor-pointer ml-auto"
             >
               <FiX className="w-5 h-5" />
             </button>
           </div>
 
           {/* Menú de navegación */}
-          <div className="flex-1 overflow-y-auto py-2">
+          <div className="flex-1 overflow-y-auto py-2 flex flex-row md:flex-col overflow-x-auto md:overflow-x-hidden">
             {menuItems.map((item) => {
               const Icon = item.icon
               const isActive = activeSection === item.id
@@ -151,14 +154,14 @@ const Configuration = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveSection(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
+                  className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 text-left transition-colors whitespace-nowrap md:w-full ${
                     isActive
                       ? 'bg-gray-100 dark:bg-[#3A2751] text-[#7C3AED] dark:text-[#9B5CFF]'
                       : 'text-[#1C1426] dark:text-[#E6CCFF] hover:bg-gray-50 dark:hover:bg-[#3B2A4F]'
                   }`}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-sm font-medium">{item.label}</span>
+                  <Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
+                  <span className="text-xs md:text-sm font-medium">{item.label}</span>
                 </button>
               )
             })}
@@ -167,8 +170,8 @@ const Configuration = () => {
 
         {/* Área de contenido */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-8 overflow-y-auto">
-            <h2 className="text-2xl font-bold text-[#4C1D95] dark:text-[#E6CCFF] mb-6">
+          <div className="p-4 sm:p-6 md:p-8 overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#4C1D95] dark:text-[#E6CCFF] mb-4 md:mb-6 hidden md:block">
               {menuItems.find(item => item.id === activeSection)?.label || 'General'}
             </h2>
             {renderContent()}
