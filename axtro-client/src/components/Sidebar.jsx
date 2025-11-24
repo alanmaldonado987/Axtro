@@ -1,18 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Swal from 'sweetalert2'
 import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import moment from 'moment/min/moment-with-locales'
 import { chatService } from '../services/chatService'
+import { FiSettings, FiUser, FiInfo } from 'react-icons/fi'
 
 moment.locale('es')
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
-  const { chats, setSelectedChat, theme, setTheme, user, navigate, logout, selectedChat, fetchUserChats } = useAppContext()
+  const { chats, setSelectedChat, theme, setTheme, user, navigate, logout, selectedChat, fetchUserChats, isInformationOpen, setIsInformationOpen } = useAppContext()
   const [search, setSearch] = useState('')
   const [isCreatingChat, setIsCreatingChat] = useState(false)
   const [deletingChatId, setDeletingChatId] = useState(null)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const userMenuRef = useRef(null)
 
   const handleCreateChat = async () => {
     if (isCreatingChat) return;
@@ -107,6 +110,47 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   }
 
+  // Cerrar menú de usuario al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isUserMenuOpen])
+
+  const handleUserMenuClick = (e) => {
+    e.stopPropagation()
+    if (user) {
+      setIsUserMenuOpen(!isUserMenuOpen)
+    }
+  }
+
+  const handleMenuOption = (option) => {
+    setIsUserMenuOpen(false)
+    switch(option) {
+      case 'configuracion':
+        navigate('/configuration')
+        break
+      case 'cuenta':
+        navigate('/account')
+        break
+      case 'informacion':
+        setIsInformationOpen(true)
+        break
+      default:
+        break
+    }
+  }
+
   return (
     <div className={`flex flex-col h-screen min-w-72 p-5 bg-[#F8F4FF] dark:bg-[#1C1426] border-r border-[#E2D4FF] dark:border-[#3B2A4F] backdrop-blur-3xl transition-all duration-500 max-md:absolute left-0 z-1 ${!isMenuOpen && 'max-md:-translate-x-full'}`}>
       {/* Logo */}
@@ -192,20 +236,52 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
         </label>
       </div>
 
-      {/* Usser Account */}
-      <div className='flex items-center gap-2 p-3 mt-4 border border-[#D8C8FF] dark:border-[#3B2A4F] rounded-md cursor-pointer bg-white/40 dark:bg-[#20152E]'>
-        <img src={assets.user_icon} className='w-7 rounder-full' alt="" />
-        <p className='flex-1 text-sm text-[#4C1D95] dark:text-[#E6CCFF] truncate'>{user ? user.name : 'Login your account'}</p>
-        { user && <img 
-          src={assets.logout_icon} 
-          className='h-5 cursor-pointer not-dark:invert hover:opacity-70 transition-opacity' 
-          alt="Cerrar sesión"
-          onClick={(e) => {
-            e.stopPropagation();
-            logout();
-          }}
-          title="Cerrar sesión"
-        /> }
+      {/* User Account */}
+      <div className='relative' ref={userMenuRef}>
+        <div 
+          onClick={handleUserMenuClick}
+          className='flex items-center gap-2 p-3 mt-4 border border-[#D8C8FF] dark:border-[#3B2A4F] rounded-md cursor-pointer bg-white/40 dark:bg-[#20152E] hover:bg-white/60 dark:hover:bg-[#2A1B3A] transition-colors'
+        >
+          <img src={assets.user_icon} className='w-7 rounded-full' alt="" />
+          <p className='flex-1 text-sm text-[#4C1D95] dark:text-[#E6CCFF] truncate'>{user ? user.name : 'Login your account'}</p>
+          { user && <img 
+            src={assets.logout_icon} 
+            className='h-5 cursor-pointer not-dark:invert hover:opacity-70 transition-opacity' 
+            alt="Cerrar sesión"
+            onClick={(e) => {
+              e.stopPropagation();
+              logout();
+            }}
+            title="Cerrar sesión"
+          /> }
+        </div>
+
+        {/* User Menu Dropdown */}
+        {isUserMenuOpen && user && (
+          <div className='absolute bottom-full left-0 mb-2 w-full bg-white dark:bg-[#2B1B3D] border border-[#E2D4FF] dark:border-[#3B2A4F] rounded-lg shadow-lg overflow-hidden z-50 animate-fade-in'>
+            <button
+              onClick={() => handleMenuOption('configuracion')}
+              className='w-full flex items-center gap-3 px-4 py-3 text-sm text-[#4C1D95] dark:text-[#E6CCFF] hover:bg-[#F1E6FF] dark:hover:bg-[#3A2751] transition-colors text-left cursor-pointer'
+            >
+              <FiSettings className='text-lg' />
+              <span>Configuración</span>
+            </button>
+            <button
+              onClick={() => handleMenuOption('cuenta')}
+              className='w-full flex items-center gap-3 px-4 py-3 text-sm text-[#4C1D95] dark:text-[#E6CCFF] hover:bg-[#F1E6FF] dark:hover:bg-[#3A2751] transition-colors text-left border-t border-[#E2D4FF] dark:border-[#3B2A4F] cursor-pointer'
+            >
+              <FiUser className='text-lg' />
+              <span>Cuenta</span>
+            </button>
+            <button
+              onClick={() => handleMenuOption('informacion')}
+              className='w-full flex items-center gap-3 px-4 py-3 text-sm text-[#4C1D95] dark:text-[#E6CCFF] hover:bg-[#F1E6FF] dark:hover:bg-[#3A2751] transition-colors text-left border-t border-[#E2D4FF] dark:border-[#3B2A4F] cursor-pointer'
+            >
+              <FiInfo className='text-lg' />
+              <span>Información</span>
+            </button>
+          </div>
+        )}
       </div>
 
       <img onClick={()=>setIsMenuOpen(false)} src={assets.close_icon} className='hidden max-md:block absolute top-3 right-3 w-5 h-5 cursor-pointer not-dark:invert' alt="" />

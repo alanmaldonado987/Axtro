@@ -14,6 +14,7 @@ export const AppContextProvider = ({ children }) => {
     const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
     const [loading, setLoading] = useState(true);
     const [chatsLoading, setChatsLoading] = useState(false);
+    const [isInformationOpen, setIsInformationOpen] = useState(false);
 
     const fetchUser = async () => {
         const token = authService.getToken();
@@ -95,7 +96,7 @@ export const AppContextProvider = ({ children }) => {
     }, [])
 
     const value = {
-        navigate, user, setUser, fetchUser, logout, chats, setChats, fetchUserChats, selectedChat, setSelectedChat, theme, setTheme, loading, chatsLoading
+        navigate, user, setUser, fetchUser, logout, chats, setChats, fetchUserChats, selectedChat, setSelectedChat, theme, setTheme, loading, chatsLoading, isInformationOpen, setIsInformationOpen
     }
 
     return (

@@ -9,10 +9,13 @@ import './styles/prism.css'
 import Loading from './pages/Loading'
 import LoginRegister from './pages/LoginRegister'
 import { useAppContext } from './context/AppContext'
+import Configuration from './pages/Configuration'
+import Account from './pages/Account'
+import Information from './pages/Information'
 
 const App = () => {
 
-  const { user } = useAppContext()
+  const { user, isInformationOpen, setIsInformationOpen } = useAppContext()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { pathname } = useLocation()
@@ -30,6 +33,8 @@ const App = () => {
             <Route path='/' element={<ChatBox/>} />
             <Route path='/credits' element={<Credits/>} />
             <Route path='/community' element={<Community/>} />
+            <Route path='/configuration' element={<Configuration/>} />
+            <Route path='/account' element={<Account/>} />
           </Routes>
         </div>
       </div>
@@ -38,6 +43,8 @@ const App = () => {
         <LoginRegister />
       </div>
     )}
+    {/* Information Modal - Renderizado a nivel de aplicación */}
+    <Information isOpen={isInformationOpen} onClose={() => setIsInformationOpen(false)} />
     </>
   )
 }
