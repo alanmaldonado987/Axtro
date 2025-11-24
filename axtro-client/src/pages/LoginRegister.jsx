@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { FaGooglePlusG, FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { FaGooglePlusG, FaFacebookF } from "react-icons/fa";
 import { authService } from "../services/authService";
 import { useAppContext } from "../context/AppContext";
 
@@ -8,27 +8,23 @@ const LoginRegister = () => {
   const [active, setActive] = useState(false);
   const { setUser } = useAppContext();
 
-  // Estados para el formulario de registro
   const [registerData, setRegisterData] = useState({
     name: '',
     email: '',
     password: ''
   });
 
-  // Estados para el formulario de login
   const [loginData, setLoginData] = useState({
     email: '',
     password: ''
   });
 
-  // Estados para errores y carga
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [loginTransitioning, setLoginTransitioning] = useState(false);
   const transitionTimeoutRef = useRef(null);
 
-  // Manejar registro
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
@@ -49,18 +45,14 @@ const LoginRegister = () => {
       );
 
       if (response.success) {
-        // Guardar el email antes de limpiar para pasarlo al login
         const registeredEmail = registerData.email;
         
-        // Mostrar mensaje de éxito
         setSuccess('Usuario creado exitosamente. Por favor inicia sesión.');
-        // Limpiar formulario de registro
         setRegisterData({
           name: '',
           email: '',
           password: ''
         });
-        // Cambiar a vista de login después de 2 segundos y copiar el email
         setTimeout(() => {
           setActive(false);
           setSuccess('');
@@ -79,7 +71,6 @@ const LoginRegister = () => {
     }
   };
 
-  // Manejar login
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -130,7 +121,6 @@ const LoginRegister = () => {
     }
   };
 
-  // Limpiar error y éxito cuando se cambia entre login y register
   useEffect(() => {
     setError('');
     setSuccess('');
@@ -177,8 +167,6 @@ const LoginRegister = () => {
           <div className="flex gap-3 mb-6">
             <Icon><FaGooglePlusG /></Icon>
             <Icon><FaFacebookF /></Icon>
-            <Icon><FaGithub /></Icon>
-            <Icon><FaLinkedinIn /></Icon>
           </div>
 
           <span className="text-xs text-gray-600 mb-4">También puedes usar tu correo para registrarte.</span>
@@ -221,7 +209,7 @@ const LoginRegister = () => {
             <button 
               type="submit"
               disabled={loading}
-              className="bg-purple-600 text-white font-semibold px-10 py-3 rounded-lg text-sm uppercase tracking-wider hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed w-full"
+              className="bg-purple-600 text-white font-semibold px-10 py-3 rounded-lg text-sm uppercase tracking-wider hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed w-full cursor-pointer"
             >
               {loading ? 'Registrando...' : 'Registrarse'}
             </button>
@@ -242,8 +230,6 @@ const LoginRegister = () => {
           <div className="flex gap-3 mb-6">
             <Icon><FaGooglePlusG /></Icon>
             <Icon><FaFacebookF /></Icon>
-            <Icon><FaGithub /></Icon>
-            <Icon><FaLinkedinIn /></Icon>
           </div>
 
           <span className="text-xs text-gray-600 mb-4">Prefiere tu correo y contraseña si así te sientes más cómodo.</span>
@@ -275,7 +261,7 @@ const LoginRegister = () => {
             <button 
               type="submit"
               disabled={loading}
-              className="bg-purple-600 text-white font-semibold px-10 py-3 rounded-lg text-sm uppercase tracking-wider hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed w-full"
+              className="bg-purple-600 text-white font-semibold px-10 py-3 rounded-lg text-sm uppercase tracking-wider hover:bg-purple-700 transition disabled:opacity-50 disabled:cursor-not-allowed w-full cursor-pointer"
             >
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
             </button>
@@ -305,7 +291,7 @@ const LoginRegister = () => {
               </p>
               <button
                 onClick={() => setActive(false)}
-                className="border-2 border-white text-white font-semibold px-10 py-2.5 rounded-lg text-sm uppercase tracking-wider hover:bg-white hover:text-purple-600 transition"
+                className="border-2 border-white text-white font-semibold px-10 py-2.5 rounded-lg text-sm uppercase tracking-wider hover:bg-white hover:text-purple-600 transition cursor-pointer"
               >
                 Iniciar Sesión
               </button>
@@ -323,7 +309,7 @@ const LoginRegister = () => {
               </p>
               <button
                 onClick={() => setActive(true)}
-                className="border-2 border-white text-white font-semibold px-10 py-2.5 rounded-lg text-sm uppercase tracking-wider hover:bg-white hover:text-purple-600 transition"
+                className="border-2 border-white text-white font-semibold px-10 py-2.5 rounded-lg text-sm uppercase tracking-wider hover:bg-white hover:text-purple-600 transition cursor-pointer"
               >
                 Registrarse
               </button>
