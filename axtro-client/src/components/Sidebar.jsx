@@ -152,7 +152,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
   }
 
   return (
-    <div className={`flex flex-col h-screen min-w-72 p-5 bg-[#F8F4FF] dark:bg-[#1C1426] border-r border-[#E2D4FF] dark:border-[#3B2A4F] backdrop-blur-3xl transition-all duration-500 max-md:absolute left-0 z-1 ${!isMenuOpen && 'max-md:-translate-x-full'}`}>
+    <div className={`flex flex-col h-screen min-w-72 p-5 bg-[#F8F4FF] dark:bg-[#1C1426] border-r border-[#E2D4FF] dark:border-[#3B2A4F] backdrop-blur-3xl transition-all duration-500 ease-out max-md:absolute left-0 z-50 ${!isMenuOpen ? 'max-md:-translate-x-full max-md:opacity-0' : 'max-md:translate-x-0 max-md:opacity-100'}`}>
       {/* Logo */}
       <div className='flex items-center'>
         <img src={theme === 'dark' ? assets.logo_full : assets.logo_full_dark } alt='' className='w-full max-w-22' /> <p className='text-2xl text-[#4C1D95] dark:text-white'><i>Axtro AI</i></p>
