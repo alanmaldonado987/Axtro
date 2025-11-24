@@ -59,7 +59,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           confirmButton: 'swal2-confirm-btn',
           cancelButton: 'swal2-cancel-btn',
           title: 'swal2-title-text',
-          htmlContainer: 'swal2-body-text'
+          htmlContainer: 'swal2-body-text',
         },
         allowOutsideClick: () => !Swal.isLoading(),
         preConfirm: async () => {

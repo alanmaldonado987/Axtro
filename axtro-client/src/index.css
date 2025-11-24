@@ -127,6 +127,7 @@
   font-weight: 600 !important;
   font-size: 0.95rem !important;
   border: none !important;
+  cursor: pointer !important;
 }
 
 .swal2-confirm-btn{
