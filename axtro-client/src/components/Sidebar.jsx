@@ -151,6 +151,30 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
     }
   }
 
+  const handleLogout = async () => {
+    const result = await Swal.fire({
+      title: '¿Estás seguro de querer cerrar sesión?',
+      text: 'Serás redirigido a la página de inicio.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cerrar sesión',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+      buttonsStyling: false,
+      customClass: {
+        popup: 'swal2-rounded',
+        confirmButton: 'swal2-confirm-btn',
+        cancelButton: 'swal2-cancel-btn',
+        title: 'swal2-title-text',
+        htmlContainer: 'swal2-body-text',
+      }
+    })
+
+    if (result.isConfirmed) {
+      logout()
+    }
+  }
+
   return (
     <div className={`flex flex-col h-screen min-w-72 p-5 bg-[#F8F4FF] dark:bg-[#1C1426] border-r border-[#E2D4FF] dark:border-[#3B2A4F] backdrop-blur-3xl transition-all duration-500 ease-out max-md:absolute left-0 z-50 ${!isMenuOpen ? 'max-md:-translate-x-full max-md:opacity-0' : 'max-md:translate-x-0 max-md:opacity-100'}`}>
       {/* Logo */}
@@ -256,7 +280,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
             alt="Cerrar sesión"
             onClick={(e) => {
               e.stopPropagation();
-              logout();
+              handleLogout();
             }}
             title="Cerrar sesión"
           /> }

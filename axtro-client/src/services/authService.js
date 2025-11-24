@@ -161,5 +161,31 @@ export const authService = {
       };
     }
   },
+
+  /**
+   * Inicia el proceso de autenticación con Google
+   */
+  loginWithGoogle() {
+    // Obtener la URL base del API (sin /api al final)
+    let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    // Si la URL termina con /api, removerlo
+    if (apiUrl.endsWith('/api')) {
+      apiUrl = apiUrl.slice(0, -4);
+    }
+    window.location.href = `${apiUrl}/api/auth/google`;
+  },
+
+  /**
+   * Inicia el proceso de autenticación con Facebook
+   */
+  loginWithFacebook() {
+    // Obtener la URL base del API (sin /api al final)
+    let apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    // Si la URL termina con /api, removerlo
+    if (apiUrl.endsWith('/api')) {
+      apiUrl = apiUrl.slice(0, -4);
+    }
+    window.location.href = `${apiUrl}/api/auth/facebook`;
+  },
 };
 

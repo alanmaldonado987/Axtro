@@ -8,6 +8,7 @@ import { assets } from './assets/assets'
 import './styles/prism.css'
 import Loading from './pages/Loading'
 import LoginRegister from './pages/LoginRegister'
+import AuthCallback from './pages/AuthCallback'
 import { useAppContext } from './context/AppContext'
 import Configuration from './pages/Configuration'
 import Account from './pages/Account'
@@ -55,9 +56,10 @@ const App = () => {
         </div>
       </div>
     ) : (
-      <div>
-        <LoginRegister />
-      </div>
+      <Routes>
+        <Route path='/auth/callback' element={<AuthCallback />} />
+        <Route path='*' element={<LoginRegister />} />
+      </Routes>
     )}
     {/* Information Modal - Renderizado a nivel de aplicación */}
     <Information isOpen={isInformationOpen} onClose={() => setIsInformationOpen(false)} />

@@ -5,14 +5,20 @@ const userSchema = new mongoose.Schema({
     name: {type: String, required: true},
     username: {type: String, unique: true, sparse: true},
     email: {type: String, required: true, unique: true},
-    password: {type: String, required: true},
+    password: {
+        type: String, 
+        required: function() { return !this.provider; },
+        default: null
+    },
+    provider: {type: String, enum: ['google', 'facebook'], default: null},
+    providerId: {type: String, default: null},
     profilePicture: {type: String, default: null},
     credits: {type: Number, default: 50}
 })
 
-// Hash password
+// Hash password (solo si existe y no es usuario OAuth)
 userSchema.pre('save', async function (next) {
-    if(!this.isModified('password')){
+    if(!this.isModified('password') || !this.password || this.provider){
         return next()
     }
     const salt = await bcrypt.genSalt(10)

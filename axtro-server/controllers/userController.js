@@ -50,6 +50,22 @@ export const loginUser = async (req, res) => {
     try {
         const user = await User.findOne({email})
         if(user){
+            // Si el usuario es de OAuth, no puede hacer login con contraseña
+            if(user.provider){
+                return res.json({
+                    success: false,
+                    message: `Este usuario está registrado con ${user.provider === 'google' ? 'Google' : 'Facebook'}. Por favor inicia sesión con ${user.provider === 'google' ? 'Google' : 'Facebook'}.`
+                })
+            }
+
+            // Verificar que el usuario tenga contraseña
+            if(!user.password){
+                return res.json({
+                    success: false,
+                    message: "Correo o contraseña inválida"
+                })
+            }
+
             const isMatch = await bcrypt.compare(password, user.password)
 
             if(isMatch){

@@ -194,8 +194,8 @@ const LoginRegister = () => {
                 </p>
 
                 <div className="flex gap-3 mb-4 justify-center">
-                  <Icon><FaGooglePlusG /></Icon>
-                  <Icon><FaFacebookF /></Icon>
+                  <Icon onClick={() => authService.loginWithGoogle()}><FaGooglePlusG /></Icon>
+                  <Icon onClick={() => authService.loginWithFacebook()}><FaFacebookF /></Icon>
                 </div>
 
                 <span className="text-xs text-gray-600 mb-4 block text-center">Prefiere tu correo y contraseña si así te sientes más cómodo.</span>
@@ -339,8 +339,8 @@ const LoginRegister = () => {
           </p>
 
           <div className="flex gap-3 mb-6">
-            <Icon><FaGooglePlusG /></Icon>
-            <Icon><FaFacebookF /></Icon>
+            <Icon onClick={() => authService.loginWithGoogle()}><FaGooglePlusG /></Icon>
+            <Icon onClick={() => authService.loginWithFacebook()}><FaFacebookF /></Icon>
           </div>
 
           <span className="text-xs text-gray-600 mb-4">También puedes usar tu correo para registrarte.</span>
@@ -411,8 +411,8 @@ const LoginRegister = () => {
           </p>
 
           <div className="flex gap-3 mb-6">
-            <Icon><FaGooglePlusG /></Icon>
-            <Icon><FaFacebookF /></Icon>
+            <Icon onClick={() => authService.loginWithGoogle()}><FaGooglePlusG /></Icon>
+            <Icon onClick={() => authService.loginWithFacebook()}><FaFacebookF /></Icon>
           </div>
 
           <span className="text-xs text-gray-600 mb-4">Prefiere tu correo y contraseña si así te sientes más cómodo.</span>
@@ -521,11 +521,15 @@ const LoginRegister = () => {
 }
 
 /* EXTRA COMPONENTS */
-function Icon({ children }) {
+function Icon({ children, onClick }) {
   return (
-    <a className="border border-gray-300 rounded-lg flex items-center justify-center w-10 h-10 text-base text-gray-700 hover:border-purple-500 hover:text-purple-600 transition cursor-pointer">
+    <button 
+      type="button"
+      onClick={onClick}
+      className="border border-gray-300 rounded-lg flex items-center justify-center w-10 h-10 text-base text-gray-700 hover:border-purple-500 hover:text-purple-600 transition cursor-pointer"
+    >
       {children}
-    </a>
+    </button>
   );
 }
 
