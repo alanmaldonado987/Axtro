@@ -132,7 +132,10 @@ const LoginRegister = () => {
             active ? "translate-x-full opacity-100 z-20 animate-fade" : "opacity-0 z-10 pointer-events-none"
           }`}
         >
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">Crear Cuenta</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-3">Crea tu espacio en Axtro</h1>
+          <p className="text-sm text-gray-500 text-center mb-4">
+            Toma dos minutos para registrarte y empieza a conversar con tu asistente personal.
+          </p>
 
           <div className="flex gap-3 mb-6">
             <Icon><FaGooglePlusG /></Icon>
@@ -141,7 +144,7 @@ const LoginRegister = () => {
             <Icon><FaLinkedinIn /></Icon>
           </div>
 
-          <span className="text-xs text-gray-600 mb-4">o usa tu correo para registrarte</span>
+          <span className="text-xs text-gray-600 mb-4">También puedes usar tu correo para registrarte.</span>
 
           {error && active && (
             <div className="w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg mb-3 text-xs">
@@ -194,7 +197,10 @@ const LoginRegister = () => {
             active ? "-translate-x-full opacity-0 pointer-events-none" : "opacity-100 z-20"
           }`}
         >
-          <h1 className="text-3xl font-bold text-gray-800 mb-6">Iniciar Sesión</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-3">Bienvenido otra vez</h1>
+          <p className="text-sm text-gray-500 text-center mb-4">
+            Ingresa tus datos para retomar tus conversaciones cuando quieras.
+          </p>
 
           <div className="flex gap-3 mb-6">
             <Icon><FaGooglePlusG /></Icon>
@@ -203,7 +209,7 @@ const LoginRegister = () => {
             <Icon><FaLinkedinIn /></Icon>
           </div>
 
-          <span className="text-xs text-gray-600 mb-4">o usa tu correo y contraseña</span>
+          <span className="text-xs text-gray-600 mb-4">Prefiere tu correo y contraseña si así te sientes más cómodo.</span>
 
           {error && !active && (
             <div className="w-full bg-red-100 text-red-700 px-4 py-2 rounded-lg mb-3 text-xs">
@@ -256,9 +262,9 @@ const LoginRegister = () => {
                 active ? "translate-x-0" : "-translate-x-full"
               }`}
             >
-              <h1 className="text-4xl font-bold mb-3">¡Bienvenido de Nuevo!</h1>
-              <p className="text-sm leading-relaxed mb-6 px-8">
-                Ingresa tus datos personales para usar todas las funciones del sitio
+              <h1 className="text-4xl font-bold mb-3">¡Nos alegra verte!</h1>
+              <p className="text-sm leading-relaxed mb-6 px-8 opacity-90">
+                Si ya tienes cuenta, inicia sesión y continúa justo donde lo dejaste. Tus chats te están esperando.
               </p>
               <button
                 onClick={() => setActive(false)}
@@ -274,9 +280,9 @@ const LoginRegister = () => {
                 active ? "translate-x-full" : "translate-x-0"
               }`}
             >
-              <h1 className="text-4xl font-bold mb-3">¡Hola, Amigo!</h1>
-              <p className="text-sm leading-relaxed mb-6 px-8">
-                Regístrate con tus datos personales para usar todas las funciones del sitio
+              <h1 className="text-4xl font-bold mb-3">¡Hola! Qué bueno tenerte aquí</h1>
+              <p className="text-sm leading-relaxed mb-6 px-8 opacity-90">
+                Crea tu cuenta para guardar tus conversaciones, sincronizar tus ideas y seguir aprendiendo cada día.
               </p>
               <button
                 onClick={() => setActive(true)}
