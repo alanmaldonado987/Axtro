@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { FaGooglePlusG, FaFacebookF } from "react-icons/fa";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { authService } from "../services/authService";
 import { useAppContext } from "../context/AppContext";
+import ForgotPassword from "./ForgotPassword";
 
 const LoginRegister = () => {
 
@@ -23,6 +25,9 @@ const LoginRegister = () => {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [loginTransitioning, setLoginTransitioning] = useState(false);
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const transitionTimeoutRef = useRef(null);
 
   const handleRegister = async (e) => {
@@ -198,13 +203,22 @@ const LoginRegister = () => {
               onChange={(e) => setRegisterData({...registerData, email: e.target.value})}
               className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-3 text-sm outline-none focus:bg-gray-200 transition" 
             />
-            <input 
-              type="password" 
-              placeholder="Contraseña" 
-              value={registerData.password}
-              onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
-              className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-4 text-sm outline-none focus:bg-gray-200 transition" 
-            />
+            <div className="relative mb-4">
+              <input 
+                type={showRegisterPassword ? "text" : "password"} 
+                placeholder="Contraseña" 
+                value={registerData.password}
+                onChange={(e) => setRegisterData({...registerData, password: e.target.value})}
+                className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 pr-10 text-sm outline-none focus:bg-gray-200 transition" 
+              />
+              <button
+                type="button"
+                onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 transition-colors cursor-pointer"
+              >
+                {showRegisterPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+              </button>
+            </div>
 
             <button 
               type="submit"
@@ -248,15 +262,30 @@ const LoginRegister = () => {
               onChange={(e) => setLoginData({...loginData, email: e.target.value})}
               className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-3 text-sm outline-none focus:bg-gray-200 transition" 
             />
-            <input 
-              type="password" 
-              placeholder="Contraseña" 
-              value={loginData.password}
-              onChange={(e) => setLoginData({...loginData, password: e.target.value})}
-              className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 mb-2 text-sm outline-none focus:bg-gray-200 transition" 
-            />
+            <div className="relative mb-2">
+              <input 
+                type={showLoginPassword ? "text" : "password"} 
+                placeholder="Contraseña" 
+                value={loginData.password}
+                onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                className="w-full bg-gray-100 border-none rounded-lg px-4 py-3 pr-10 text-sm outline-none focus:bg-gray-200 transition" 
+              />
+              <button
+                type="button"
+                onClick={() => setShowLoginPassword(!showLoginPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 transition-colors cursor-pointer"
+              >
+                {showLoginPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+              </button>
+            </div>
 
-            <a href="#" className="text-xs text-gray-600 hover:text-gray-800 mb-4">¿Olvidaste tu contraseña?</a>
+            <button
+              type="button"
+              onClick={() => setIsForgotPasswordOpen(true)}
+              className="text-xs text-gray-600 hover:text-gray-800 mb-4 text-left cursor-pointer"
+            >
+              ¿Olvidaste tu contraseña?
+            </button>
 
             <button 
               type="submit"
@@ -317,6 +346,7 @@ const LoginRegister = () => {
           </div>
         </div>
       </div>
+      <ForgotPassword isOpen={isForgotPasswordOpen} onClose={() => setIsForgotPasswordOpen(false)} />
     </div>
   );
 }

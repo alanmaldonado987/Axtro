@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-// Cliente Axios centralizado con interceptores comunes
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
   headers: {
@@ -8,7 +7,6 @@ const axiosClient = axios.create({
   },
 });
 
-// Interceptor para adjuntar el token en cada petición
 axiosClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

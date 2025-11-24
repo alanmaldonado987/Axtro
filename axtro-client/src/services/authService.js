@@ -103,5 +103,63 @@ export const authService = {
       };
     }
   },
+
+  /**
+   * Solicita un código OTP para restablecer la contraseña
+   * @param {string} email - Email del usuario
+   * @returns {Promise<{success: boolean, message?: string}>}
+   */
+  async requestPasswordReset(email) {
+    try {
+      const response = await axiosClient.post('/user/forgot-password/request', { email });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al solicitar restablecimiento',
+      };
+    }
+  },
+
+  /**
+   * Verifica el código OTP
+   * @param {string} email - Email del usuario
+   * @param {string} code - Código OTP
+   * @returns {Promise<{success: boolean, message?: string}>}
+   */
+  async verifyOTP(email, code) {
+    try {
+      const response = await axiosClient.post('/user/forgot-password/verify', { email, code });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al verificar el código',
+      };
+    }
+  },
+
+  /**
+   * Restablece la contraseña del usuario
+   * @param {string} email - Email del usuario
+   * @param {string} code - Código OTP verificado
+   * @param {string} newPassword - Nueva contraseña
+   * @returns {Promise<{success: boolean, message?: string}>}
+   */
+  async resetPassword(email, code, newPassword) {
+    try {
+      const response = await axiosClient.post('/user/forgot-password/reset', {
+        email,
+        code,
+        newPassword,
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al restablecer la contraseña',
+      };
+    }
+  },
 };
 
