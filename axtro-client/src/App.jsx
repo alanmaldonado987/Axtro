@@ -23,7 +23,7 @@ const App = () => {
     <>
     {!isMenuOpen && <img src={assets.menu_icon} className='absolute top-3 left-3 w-8 h-8 cursor-pointer md:hidden not-dark:invert' onClick={()=>setIsMenuOpen(true)} />}
     {user ? (
-      <div className='dark:bg-gradient-to-b from-[#242124] to-[#000000]'>
+      <div className='bg-[#F7F4FF] dark:bg-[#0F0618] transition-colors duration-300'>
         <div className='flex h-screen w-screen'>
           <Sidebar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
           <Routes>

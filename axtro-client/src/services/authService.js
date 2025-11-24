@@ -1,8 +1,5 @@
-import api from './api.js';
+import axiosClient from '../interceptors/axiosClient.js';
 
-/**
- * Servicio de autenticación
- */
 export const authService = {
   /**
    * Registra un nuevo usuario
@@ -13,7 +10,7 @@ export const authService = {
    */
   async register(name, email, password) {
     try {
-      const response = await api.post('/user/register', {
+      const response = await axiosClient.post('/user/register', {
         name,
         email,
         password,
@@ -35,7 +32,7 @@ export const authService = {
    */
   async login(email, password) {
     try {
-      const response = await api.post('/user/login', {
+      const response = await axiosClient.post('/user/login', {
         email,
         password,
       });
@@ -54,7 +51,7 @@ export const authService = {
    */
   async getUserData() {
     try {
-      const response = await api.get('/user/data');
+      const response = await axiosClient.get('/user/data');
       return response.data;
     } catch (error) {
       return {

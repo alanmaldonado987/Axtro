@@ -40,9 +40,9 @@ const ChatBox = () => {
       {/* Chat Messages */}
       <div ref={containerRef} className='flex-1 mb-5 overflow-y-scroll'>
         {messages.length === 0 && (
-          <div className='h-full flex flex-col items-center justify-center gap-2 text-primary'>
+          <div className='h-full flex flex-col items-center justify-center gap-2 text-[#7C3AED]'>
             <img src={ theme === 'dark' ? assets.logo_full : assets.logo_full_dark } className='w-full max-w-56 sm:max-w-68' alt="" />
-            <p className='mt-5 text-4xl sm:text-6xl text-center text-gray-400 dark:text-white'>Preguntame algo.</p>
+            <p className='mt-5 text-4xl sm:text-6xl text-center text-[#7C3AED] dark:text-[#E6CCFF]'>Preguntame algo.</p>
           </div>
         )}
 
@@ -51,27 +51,27 @@ const ChatBox = () => {
         {/* Tree Dots Loading */}
         {
           loading && <div className='loader flex items-center gap-1.5'>
-              <div className='w-1.5 h-1.5 rounded-full bg-gray-500 dark:bg-white animate-bounce'></div>
-              <div className='w-1.5 h-1.5 rounded-full bg-gray-500 dark:bg-white animate-bounce'></div>
-              <div className='w-1.5 h-1.5 rounded-full bg-gray-500 dark:bg-white animate-bounce'></div>
+              <div className='w-1.5 h-1.5 rounded-full bg-[#A07BDD] dark:bg-white animate-bounce'></div>
+              <div className='w-1.5 h-1.5 rounded-full bg-[#8D6BC7] dark:bg-white animate-bounce'></div>
+              <div className='w-1.5 h-1.5 rounded-full bg-[#7C5AB8] dark:bg-white animate-bounce'></div>
             </div>
         }
       </div>
 
       {mode === 'imagen' && (
-        <label className='inline-flex items-center gap-2 mb-3 text-sm mx-auto'>
+        <label className='inline-flex items-center gap-2 mb-3 text-sm mx-auto text-[#4C1D95]'>
           <p className='text-xs'>Publish Generated Image to Community</p>
           <input type="checkbox" className='cursor-pointer' checked={isPublished} onChange={(e)=>setIsPublished(e.target.checked)} />
         </label>
       )}
 
       {/* Prompt Input Box */}
-      <form onSubmit={onSubmit} className='bg-primary/20 dark:bg-[#583C79]/30 border boder-primary dark:border-[#80609F]/30 rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center dark:text-white'>
-        <select onChange={(e)=>setMode(e.target.value)} value={mode} className='text-sm pl-3 pr-2 outline-none'>
-          <option className='dark:bg-purple-900' value="texto">Texto</option>
-          <option className='dark:bg-purple-900' value="imagen">Imagen</option>
+      <form onSubmit={onSubmit} className='bg-[#F1E6FF] dark:bg-[#2B1B3D] border border-[#D8C8FF] dark:border-[#3B2A4F] rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center text-[#4C1D95] dark:text-white'>
+        <select onChange={(e)=>setMode(e.target.value)} value={mode} className='text-sm pl-3 pr-2 outline-none bg-transparent text-[#4C1D95] dark:text-white'>
+          <option className='text-[#4C1D95]' value="texto">Texto</option>
+          <option className='text-[#4C1D95]' value="imagen">Imagen</option>
         </select>
-        <input onChange={(e)=>setPrompt(e.target.value)} value={prompt} className='flex-1 w-full text-sm outline-none' type="text" placeholder='Escribe aquí...' required />
+        <input onChange={(e)=>setPrompt(e.target.value)} value={prompt} className='flex-1 w-full text-sm outline-none bg-transparent text-[#33204D] dark:text-white placeholder:text-[#B19CD6]' type="text" placeholder='Escribe aquí...' required />
         <button disabled={loading}>
           <img src={loading ? assets.stop_icon : assets.send_icon} className='w-8 cursor-pointer' alt="" />
         </button>
