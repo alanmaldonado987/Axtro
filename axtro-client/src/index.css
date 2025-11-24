@@ -50,3 +50,65 @@
 .loader div:nth-child(3){
   animation-delay: 0.4s;
 }
+
+.swal2-rounded{
+  border-radius: 1.5rem !important;
+  padding: 2.5rem 2rem !important;
+  border: 1px solid #E2D4FF !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 25px 65px rgba(124, 58, 237, 0.15) !important;
+}
+
+.dark .swal2-rounded{
+  border-color: #3B2A4F !important;
+  background: #1C1426 !important;
+  box-shadow: 0 25px 65px rgba(0, 0, 0, 0.6) !important;
+  color: #E6CCFF !important;
+}
+
+.swal2-title-text{
+  font-size: 1.5rem !important;
+  color: #4C1D95 !important;
+  font-weight: 700 !important;
+}
+
+.dark .swal2-title-text{
+  color: #E6CCFF !important;
+}
+
+.swal2-body-text{
+  color: #6B4AA6 !important;
+  font-size: 0.95rem !important;
+}
+
+.dark .swal2-body-text{
+  color: #CFC0E6 !important;
+}
+
+.swal2-confirm-btn,
+.swal2-cancel-btn{
+  border-radius: 9999px !important;
+  padding: 0.65rem 1.75rem !important;
+  font-weight: 600 !important;
+  font-size: 0.95rem !important;
+  border: none !important;
+}
+
+.swal2-confirm-btn{
+  background: linear-gradient(120deg, #7C3AED, #9B5CFF) !important;
+  color: #FFFFFF !important;
+}
+
+.swal2-confirm-btn:hover{
+  background: linear-gradient(120deg, #6931C9, #8748EB) !important;
+}
+
+.swal2-cancel-btn{
+  background: #F0E9FF !important;
+  color: #4C1D95 !important;
+}
+
+.dark .swal2-cancel-btn{
+  background: #2B1B3D !important;
+  color: #E6CCFF !important;
+}

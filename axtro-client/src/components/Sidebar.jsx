@@ -1,12 +1,109 @@
 import React, { useState } from 'react'
+import Swal from 'sweetalert2'
 import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import moment from 'moment'
+import { chatService } from '../services/chatService'
 
 const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
 
-  const { chats, setSelectedChat, theme, setTheme, user, navigate, logout } = useAppContext()
+  const { chats, setSelectedChat, theme, setTheme, user, navigate, logout, selectedChat, fetchUserChats } = useAppContext()
   const [search, setSearch] = useState('')
+  const [isCreatingChat, setIsCreatingChat] = useState(false)
+  const [deletingChatId, setDeletingChatId] = useState(null)
+
+  const handleCreateChat = async () => {
+    if (isCreatingChat) return;
+    try {
+      setIsCreatingChat(true)
+      const response = await chatService.createChat()
+      if(response.success){
+        if (response.chat) {
+          setSelectedChat(response.chat)
+        }
+        await fetchUserChats()
+      }else{
+        console.error(response.message || 'Error al crear chat')
+      }
+    } catch (error) {
+      console.error('Error al crear chat', error)
+    } finally {
+      setIsCreatingChat(false)
+    }
+  }
+
+  const handleDeleteChat = async (e, chatId) => {
+    e.stopPropagation()
+    if (deletingChatId) return;
+
+    setDeletingChatId(chatId)
+
+    try {
+      const result = await Swal.fire({
+        title: '¿Estás seguro de borrar el chat?',
+        text: 'Esta acción eliminará la conversación de forma permanente.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, borrar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        buttonsStyling: false,
+        showLoaderOnConfirm: true,
+        customClass: {
+          popup: 'swal2-rounded',
+          confirmButton: 'swal2-confirm-btn',
+          cancelButton: 'swal2-cancel-btn',
+          title: 'swal2-title-text',
+          htmlContainer: 'swal2-body-text'
+        },
+        allowOutsideClick: () => !Swal.isLoading(),
+        preConfirm: async () => {
+          const response = await chatService.deleteChat(chatId)
+          if (!response.success) {
+            throw new Error(response.message || 'No se pudo eliminar el chat.')
+          }
+          return response
+        }
+      })
+
+      if (result.isConfirmed) {
+        if (selectedChat?._id === chatId) {
+          setSelectedChat(null)
+        }
+        await fetchUserChats()
+        Swal.fire({
+          icon: 'success',
+          title: 'Chat eliminado',
+          text: 'La conversación se eliminó correctamente.',
+          confirmButtonText: 'Entendido',
+          buttonsStyling: false,
+          customClass: {
+            popup: 'swal2-rounded',
+            confirmButton: 'swal2-confirm-btn',
+            title: 'swal2-title-text',
+            htmlContainer: 'swal2-body-text'
+          }
+        })
+      }
+    } catch (error) {
+      console.error('Error al eliminar chat', error)
+      Swal.fire({
+        icon: 'error',
+        title: 'Algo salió mal',
+        text: 'Intenta nuevamente en unos segundos.',
+        confirmButtonText: 'Entendido',
+        buttonsStyling: false,
+        customClass: {
+          popup: 'swal2-rounded',
+          confirmButton: 'swal2-confirm-btn',
+          title: 'swal2-title-text',
+          htmlContainer: 'swal2-body-text'
+        }
+      })
+    } finally {
+      setDeletingChatId(null)
+    }
+  }
 
   return (
     <div className={`flex flex-col h-screen min-w-72 p-5 bg-[#F8F4FF] dark:bg-[#1C1426] border-r border-[#E2D4FF] dark:border-[#3B2A4F] backdrop-blur-3xl transition-all duration-500 max-md:absolute left-0 z-1 ${!isMenuOpen && 'max-md:-translate-x-full'}`}>
@@ -16,7 +113,11 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       </div>
 
       {/* New Chat Button */}
-      <button className='flex justify-center items-center w-full py-2 mt-10 text-white bg-[#7C3AED] hover:bg-[#6931C9] text-sm rounded-md cursor-pointer transition-colors'>
+      <button
+        onClick={handleCreateChat}
+        disabled={isCreatingChat}
+        className='flex justify-center items-center w-full py-2 mt-10 text-white bg-[#7C3AED] hover:bg-[#6931C9] text-sm rounded-md cursor-pointer transition-colors disabled:opacity-60 disabled:cursor-not-allowed'
+      >
         <span className='mr-1'> + </span>Nuevo chat
       </button>
 
@@ -30,8 +131,14 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       {chats.length > 0 && <p className='mt-4 text-sm text-[#4C1D95] dark:text-white'>Chats recientes</p>}
       <div className='flex-1 min-h-0 overflow-y-auto custom-scrollbar mt-3 text-sm space-y-3 pr-2'>
         {
-          chats.filter((chat) => chat.messages[0] ? chat.messages[0]?.content.toLowerCase().includes(search.toLocaleLowerCase()) : chat.name.toLowerCase().includes(search.toLocaleLowerCase())).map((chat) => (
-            <div onClick={()=>{navigate('/'); setSelectedChat(chat); setIsMenuOpen(false)}} key={chat._id} className='p-2 px-4 bg-[#F4EEFF] dark:bg-[#2B1B3D] border border-[#E2D4FF] dark:border-[#3B2A4F] flex justify-between group text-[#33204D] dark:text-white'>
+          chats.filter((chat) => chat.messages[0] ? chat.messages[0]?.content.toLowerCase().includes(search.toLocaleLowerCase()) : chat.name.toLowerCase().includes(search.toLocaleLowerCase())).map((chat) => {
+            const isActive = selectedChat?._id === chat._id
+            return (
+            <div
+              onClick={()=>{navigate('/'); setSelectedChat(chat); setIsMenuOpen(false)}}
+              key={chat._id}
+              className={`p-2 px-4 border flex justify-between group text-[#33204D] dark:text-white cursor-pointer ${isActive ? 'bg-[#E5D9FF] border-[#C2A7FF] dark:bg-[#3A2751]' : 'bg-[#F4EEFF] dark:bg-[#2B1B3D] border-[#E2D4FF] dark:border-[#3B2A4F]'}`}
+            >
               <div>
                 <p className='truncate w-full '>
                   {chat.messages.length > 0 ? chat.messages[0].content.slice(0,32) : chat.name}
@@ -40,9 +147,15 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
                   {moment(chat.updatedAt).fromNow()}
                 </p>
               </div>
-              <img src={assets.bin_icon} className='hidden group-hover:block w-4 cursor-pointer not-dark:invert opacity-70 hover:opacity-100' alt="" />
+              <img
+                src={assets.bin_icon}
+                className='hidden group-hover:block w-4 cursor-pointer not-dark:invert opacity-70 hover:opacity-100'
+                alt="Eliminar chat"
+                title="Eliminar chat"
+                onClick={(e)=>handleDeleteChat(e, chat._id)}
+              />
             </div>
-          ))
+          )})
         }
       </div>
 
