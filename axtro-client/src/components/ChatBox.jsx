@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import Message from './Message'
 import { messageService } from '../services/messageService'
+import { chatService } from '../services/chatService'
 import { FiMic } from 'react-icons/fi'
 import { RiVoiceprintFill } from 'react-icons/ri'
 
@@ -136,9 +137,39 @@ const ChatBox = () => {
   }
 
   const processSubmit = async () => {
-    if (!selectedChat?._id || !prompt.trim() || sending) return
-    const chatId = selectedChat._id
-    const chatName = selectedChat.name || 'tu chat'
+    if (!prompt.trim() || sending) return
+    
+    let chatId = selectedChat?._id
+    let chatName = selectedChat?.name || 'tu chat'
+    
+    // Si no hay chat seleccionado, crear uno nuevo automáticamente
+    if (!chatId) {
+      try {
+        setSending(true)
+        setError('')
+        setErrorFading(false)
+        const createResponse = await chatService.createChat()
+        if (createResponse.success && createResponse.chat) {
+          const newChat = createResponse.chat
+          setChats(prev => [newChat, ...prev])
+          setSelectedChat(newChat)
+          selectedChatIdRef.current = newChat._id
+          chatId = newChat._id
+          chatName = newChat.name || 'tu chat'
+        } else {
+          setError(createResponse.message || 'No se pudo crear el chat.')
+          setErrorFading(false)
+          setSending(false)
+          return
+        }
+      } catch (err) {
+        setError('Error al crear el chat.')
+        setErrorFading(false)
+        setSending(false)
+        return
+      }
+    }
+    
     setError('')
     setErrorFading(false)
     const userMessage = { role: 'user', content: prompt, timestamp: Date.now(), isImage: false }
@@ -325,7 +356,6 @@ const ChatBox = () => {
           type="text"
           placeholder={personalizationSettings?.sendBehavior === 'ctrlEnter' ? 'Escribe y presiona Ctrl+Enter…' : 'Escribe aquí…'}
           required
-          disabled={!selectedChat}
         />
         <button
           type="button"
@@ -342,7 +372,6 @@ const ChatBox = () => {
             borderColor: 'rgba(0,0,0,0.08)'
           }}
           title={isListening ? 'Detener dictado' : 'Dictar con micrófono'}
-          disabled={!selectedChat}
         >
           {isListening ? (
             <>
@@ -358,7 +387,6 @@ const ChatBox = () => {
         <button 
           type={sending ? 'button' : 'submit'}
           onClick={sending ? handleStop : undefined}
-          disabled={!selectedChat}
           className={sending ? 'cursor-pointer' : ''}
         >
           <img src={sending ? assets.stop_icon : assets.send_icon} className='w-8 cursor-pointer' alt={sending ? 'Detener' : 'Enviar'} />

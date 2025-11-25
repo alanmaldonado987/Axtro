@@ -25,11 +25,6 @@ const App = () => {
 
   if (pathname === '/loading') return <Loading />
 
-  // La ruta /auth/callback debe estar disponible siempre
-  // if (pathname === '/auth/callback') {
-  //   return <AuthCallback />
-  // }
-
   return (
     <>
     {user && !isMenuOpen && (
