@@ -15,6 +15,21 @@ export const AppContextProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
     const [chatsLoading, setChatsLoading] = useState(false);
     const [isInformationOpen, setIsInformationOpen] = useState(false);
+    const [notificationSettings, setNotificationSettings] = useState(() => {
+        try{
+            const stored = localStorage.getItem('notificationSettings')
+            if(stored){
+                return JSON.parse(stored)
+            }
+        }catch (error){
+            console.error('Error al leer notificationSettings:', error)
+        }
+        return {
+            newMessageAlerts: true,
+            emailUpdates: false
+        }
+    })
+    const [toast, setToast] = useState(null)
 
     const fetchUser = async () => {
         const token = authService.getToken();
@@ -92,11 +107,35 @@ export const AppContextProvider = ({ children }) => {
     }, [theme])
 
     useEffect(()=>{
+        try{
+            localStorage.setItem('notificationSettings', JSON.stringify(notificationSettings))
+        }catch(error){
+            console.error('Error al guardar notificationSettings:', error)
+        }
+    }, [notificationSettings])
+
+    useEffect(()=>{
+        if(!toast) return
+        const timer = setTimeout(() => setToast(null), toast.duration || 5000)
+        return () => clearTimeout(timer)
+    }, [toast])
+
+    useEffect(()=>{
         fetchUser()
     }, [])
 
+    const pushNotification = (payload) => {
+        setToast({
+            id: Date.now(),
+            duration: payload.duration || 5000,
+            ...payload,
+        })
+    }
+
+    const clearToast = () => setToast(null)
+
     const value = {
-        navigate, user, setUser, fetchUser, logout, chats, setChats, fetchUserChats, selectedChat, setSelectedChat, theme, setTheme, loading, chatsLoading, isInformationOpen, setIsInformationOpen
+        navigate, user, setUser, fetchUser, logout, chats, setChats, fetchUserChats, selectedChat, setSelectedChat, theme, setTheme, loading, chatsLoading, isInformationOpen, setIsInformationOpen, notificationSettings, setNotificationSettings, toast, pushNotification, clearToast
     }
 
     return (

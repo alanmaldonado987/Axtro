@@ -4,7 +4,7 @@ import { useAppContext } from '../context/AppContext'
 import { authService } from '../services/authService'
 
 const Configuration = () => {
-  const { navigate, theme, setTheme, user, setUser, fetchUser, logout } = useAppContext()
+  const { navigate, theme, setTheme, user, setUser, fetchUser, logout, notificationSettings, setNotificationSettings } = useAppContext()
   const [activeSection, setActiveSection] = useState('general')
   const [settings, setSettings] = useState({
     aspecto: 'Sistema',
@@ -60,6 +60,13 @@ const Configuration = () => {
     setSettings(prev => ({
       ...prev,
       [key]: value
+    }))
+  }
+
+  const handleNotificationToggle = (key) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      [key]: !prev[key]
     }))
   }
 
@@ -427,6 +434,62 @@ const Configuration = () => {
     )
   }
 
+  const renderNotificationSettings = () => {
+    return (
+      <div className="space-y-6 sm:space-y-8">
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Alertas de nuevos mensajes</h3>
+              <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mt-1">
+                Recibe una notificación emergente cuando Axtro responda en un chat que no estás viendo.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleNotificationToggle('newMessageAlerts')}
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${notificationSettings?.newMessageAlerts ? 'bg-[#7C3AED]' : 'bg-gray-300 dark:bg-[#3B2A4F]'}`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${notificationSettings?.newMessageAlerts ? 'translate-x-5' : 'translate-x-1'}`}
+              />
+            </button>
+          </div>
+          {notificationSettings?.newMessageAlerts && (
+            <div className="mt-4 rounded-xl bg-[#F3E8FF] dark:bg-[#2B1B3D] border border-[#E2D4FF]/60 dark:border-[#3B2A4F] p-4 text-sm text-[#4C1D95] dark:text-[#E6CCFF]">
+              Te mostraremos un aviso en la esquina inferior derecha y podrás volver al chat con un clic.
+            </div>
+          )}
+        </div>
+
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Correos de actualizaciones</h3>
+              <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mt-1">
+                Mantente al día con nuevas funciones, lanzamientos y mejoras importantes en la plataforma.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleNotificationToggle('emailUpdates')}
+              className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${notificationSettings?.emailUpdates ? 'bg-[#7C3AED]' : 'bg-gray-300 dark:bg-[#3B2A4F]'}`}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${notificationSettings?.emailUpdates ? 'translate-x-5' : 'translate-x-1'}`}
+              />
+            </button>
+          </div>
+          <ul className="mt-4 space-y-2 text-sm text-gray-600 dark:text-[#CFC0E6]/80">
+            <li>• Lanzamientos de productos y nuevas herramientas.</li>
+            <li>• Consejos para aprovechar mejor Axtro.</li>
+            <li>• Invitaciones anticipadas a betas cerradas.</li>
+          </ul>
+        </div>
+      </div>
+    )
+  }
+
   const renderGeneralSettings = () => {
     return (
       <div className="space-y-4 sm:space-y-6">
@@ -495,7 +558,7 @@ const Configuration = () => {
       case 'general':
         return renderGeneralSettings()
       case 'notificaciones':
-        return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Configuración de notificaciones</div>
+        return renderNotificationSettings()
       case 'personalizacion':
         return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Configuración de personalización</div>
       case 'seguridad':

@@ -14,6 +14,7 @@ import Configuration from './pages/Configuration'
 import Account from './pages/Account'
 import Information from './pages/Information'
 import { FiMenu } from 'react-icons/fi'
+import NotificationToast from './components/NotificationToast'
 
 const App = () => {
 
@@ -67,6 +68,7 @@ const App = () => {
     )}
     {/* Information Modal - Renderizado a nivel de aplicación */}
     <Information isOpen={isInformationOpen} onClose={() => setIsInformationOpen(false)} />
+    <NotificationToast />
     </>
   )
 }

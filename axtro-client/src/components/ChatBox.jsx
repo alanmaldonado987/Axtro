@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAppContext } from '../context/AppContext'
 import { assets } from '../assets/assets'
 import Message from './Message'
@@ -25,11 +26,14 @@ const ChatBox = () => {
   const containerRef = useRef(null)
   const recognitionRef = useRef(null)
   const abortControllerRef = useRef(null)
+  const selectedChatIdRef = useRef(null)
 
-  const { selectedChat, theme, setChats, setSelectedChat, fetchUserChats } = useAppContext()
+  const { selectedChat, theme, setChats, setSelectedChat, fetchUserChats, notificationSettings, pushNotification } = useAppContext()
+  const location = useLocation()
   const messages = selectedChat?.messages || []
 
   const [sending, setSending] = useState(false)
+  const [sendingChatId, setSendingChatId] = useState(null)
   const [prompt, setPrompt] = useState('')
   const [mode, setMode] = useState('texto')
   const [isPublished, setIsPublished] = useState(false)
@@ -86,26 +90,33 @@ const ChatBox = () => {
     }
   }, [])
 
-  const appendMessagesToCurrentChat = (newMessages) => {
-    if (!selectedChat?._id) return
+  useEffect(() => {
+    selectedChatIdRef.current = selectedChat?._id || null
+  }, [selectedChat?._id])
+
+  const appendMessagesToChat = (chatId, newMessages) => {
+    if (!chatId) return
     setChats(prev => prev.map(chat => {
-      if (chat._id === selectedChat._id) {
-        return {...chat, messages: [...chat.messages, ...newMessages], updatedAt: Date.now()}
+      if (chat._id === chatId) {
+        return { ...chat, messages: [...chat.messages, ...newMessages], updatedAt: Date.now() }
       }
       return chat
     }))
-    setSelectedChat(prev => prev && prev._id === selectedChat._id ? {...prev, messages: [...prev.messages, ...newMessages], updatedAt: Date.now()} : prev)
+    setSelectedChat(prev => prev && prev._id === chatId ? { ...prev, messages: [...prev.messages, ...newMessages], updatedAt: Date.now() } : prev)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!selectedChat?._id || !prompt.trim() || sending) return
+    const chatId = selectedChat._id
+    const chatName = selectedChat.name || 'tu chat'
     setError('')
     setErrorFading(false)
     const userMessage = { role: 'user', content: prompt, timestamp: Date.now(), isImage: false }
-    appendMessagesToCurrentChat([userMessage])
+    appendMessagesToChat(chatId, [userMessage])
     setPrompt('')
     setSending(true)
+    setSendingChatId(chatId)
     
     // Crear AbortController para poder cancelar la petición
     abortControllerRef.current = new AbortController()
@@ -117,7 +128,16 @@ const ChatBox = () => {
         : await messageService.sendTextMessage(selectedChat._id, userMessage.content, signal)
 
       if (response.success && response.reply) {
-        appendMessagesToCurrentChat([response.reply])
+        appendMessagesToChat(chatId, [response.reply])
+        const isViewingChat = location.pathname === '/' && selectedChatIdRef.current === chatId && !document.hidden
+        if (notificationSettings?.newMessageAlerts && !isViewingChat) {
+          pushNotification({
+            title: 'Axtro ya respondió',
+            message: `Hay una nueva respuesta en "${chatName}".`,
+            actionLabel: 'Ver chat',
+            chatId
+          })
+        }
       } else {
         setError(response.message || 'No se pudo enviar el mensaje.')
         setErrorFading(false)
@@ -128,12 +148,12 @@ const ChatBox = () => {
         setError('Envío cancelado.')
         setErrorFading(false)
         setChats(prev => prev.map(chat => {
-          if (chat._id === selectedChat._id) {
-            return {...chat, messages: chat.messages.filter(m => m.timestamp !== userMessage.timestamp), updatedAt: Date.now()}
+          if (chat._id === chatId) {
+            return { ...chat, messages: chat.messages.filter(m => m.timestamp !== userMessage.timestamp), updatedAt: Date.now() }
           }
           return chat
         }))
-        setSelectedChat(prev => prev && prev._id === selectedChat._id ? {...prev, messages: prev.messages.filter(m => m.timestamp !== userMessage.timestamp), updatedAt: Date.now()} : prev)
+        setSelectedChat(prev => prev && prev._id === chatId ? { ...prev, messages: prev.messages.filter(m => m.timestamp !== userMessage.timestamp), updatedAt: Date.now() } : prev)
         
         setTimeout(() => {
           setErrorFading(true)
@@ -149,6 +169,7 @@ const ChatBox = () => {
       }
     } finally {
       setSending(false)
+      setSendingChatId(null)
       abortControllerRef.current = null
     }
   }
@@ -157,6 +178,7 @@ const ChatBox = () => {
     if (abortControllerRef.current && sending) {
       abortControllerRef.current.abort()
       setSending(false)
+      setSendingChatId(null)
     }
   }
 
@@ -214,7 +236,7 @@ const ChatBox = () => {
 
         {/* Tree Dots Loading */}
         {
-          sending && <div className='loader flex items-center gap-1.5'>
+          sending && selectedChat?._id === sendingChatId && <div className='loader flex items-center gap-1.5'>
               <div className='w-1.5 h-1.5 rounded-full bg-[#A07BDD] dark:bg-white animate-bounce'></div>
               <div className='w-1.5 h-1.5 rounded-full bg-[#8D6BC7] dark:bg-white animate-bounce'></div>
               <div className='w-1.5 h-1.5 rounded-full bg-[#7C5AB8] dark:bg-white animate-bounce'></div>
