@@ -274,8 +274,7 @@ const Configuration = () => {
     { id: 'general', icon: FiSettings, label: 'General' },
     { id: 'notificaciones', icon: FiBell, label: 'Notificaciones' },
     { id: 'personalizacion', icon: FiClock, label: 'Personalización' },
-    { id: 'seguridad', icon: FiLock, label: 'Seguridad' },
-    { id: 'cuenta', icon: FiUser, label: 'Cuenta' }
+    { id: 'seguridad', icon: FiLock, label: 'Seguridad' }
   ]
 
   const handleClose = () => {
@@ -1121,8 +1120,6 @@ const Configuration = () => {
         return renderPersonalizationSettings()
       case 'seguridad':
         return renderSecuritySettings()
-      case 'cuenta':
-        return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Configuración de cuenta</div>
       default:
         return renderGeneralSettings()
     }
@@ -1130,7 +1127,7 @@ const Configuration = () => {
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 dark:bg-black/60 backdrop-blur-sm p-2 sm:p-4"
+      className="configuration-panel fixed inset-0 z-50 flex items-center justify-center bg-black/30 dark:bg-black/60 backdrop-blur-sm p-2 sm:p-4"
       onClick={handleClose}
     >
       <div 
