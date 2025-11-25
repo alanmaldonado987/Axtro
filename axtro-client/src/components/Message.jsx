@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import { assets } from '../assets/assets'
 import moment from 'moment/min/moment-with-locales'
 import Markdown from 'react-markdown'
 import Prism from 'prismjs'
@@ -11,9 +10,8 @@ import { useAppContext } from '../context/AppContext'
 moment.locale('es')
 
 const Message = ({ message }) => {
-  const { user } = useAppContext()
+  const { user, personalizationSettings } = useAppContext()
 
-  // Obtener iniciales del nombre
   const getInitials = (name) => {
     if (!name) return 'U'
     return name
@@ -24,7 +22,6 @@ const Message = ({ message }) => {
       .slice(0, 2)
   }
 
-  // Obtener avatar del usuario
   const getUserAvatar = () => {
     if (user?.profilePicture) {
       return user.profilePicture
@@ -36,18 +33,60 @@ const Message = ({ message }) => {
     Prism.highlightAll();
   }, [message.content])
 
+  const spacingStyle = {
+    marginTop: 'calc(var(--message-gap) / 2)',
+    marginBottom: 'calc(var(--message-gap) / 2)'
+  }
+
+  const bubbleBaseStyle = {
+    padding: 'var(--message-padding)',
+    borderRadius: 'var(--bubble-radius)'
+  }
+
+  const animationClass = personalizationSettings?.messageAnimations === 'gentle'
+    ? 'animate-message-gentle'
+    : personalizationSettings?.messageAnimations === 'fade'
+      ? 'animate-message-fade'
+      : ''
+
+  const showTimestamps = personalizationSettings?.showTimestamps !== false
+
   return (
     <div>
       {message.role === 'user' ? (
-        <div className='flex items-start justify-end my-4 gap-2'>
-          <div className='flex flex-col gap-2 p-3 px-5 bg-white dark:bg-[#2F1B45] border border-[#E2D4FF] dark:border-[#7C3AED]/40 rounded-2xl shadow-sm max-w-3xl text-right'>
-            <p className='text-sm text-[#2F1B45] dark:text-white leading-relaxed'>{message.content}</p>
-            <span className='text-xs text-[#9A8AB8] dark:text-[#D4C8F2]'>{moment(message.timestamp).locale('es').fromNow()}</span>
+        <div className={`flex items-start justify-end gap-2 ${animationClass}`} style={spacingStyle}>
+          <div
+            className='flex flex-col gap-2 border shadow-sm max-w-3xl text-right'
+            style={{
+              ...bubbleBaseStyle,
+              background: 'var(--chat-user-bg)',
+              borderColor: 'rgba(0,0,0,0.05)',
+            }}
+          >
+            <p className='text-sm leading-relaxed' style={{ color: 'var(--chat-text-strong)' }}>
+              {message.content}
+            </p>
+            {showTimestamps && (
+              <span className='text-xs' style={{ color: 'var(--chat-text-strong)', opacity: 0.6 }}>
+                {moment(message.timestamp).locale('es').fromNow()}
+              </span>
+            )}
           </div>
           {getUserAvatar() ? (
-            <img src={getUserAvatar()} className='w-8 h-8 rounded-full object-cover' alt="Usuario" />
+            <img
+              src={getUserAvatar()}
+              className='w-8 h-8 object-cover'
+              style={{ borderRadius: personalizationSettings?.userAvatarStyle === 'square' ? '0.9rem' : '9999px' }}
+              alt="Usuario"
+            />
           ) : (
-            <div className='w-8 h-8 rounded-full bg-gradient-to-br from-[#7C3AED] to-[#9B5CFF] flex items-center justify-center text-white text-xs font-bold'>
+            <div
+              className='w-8 h-8 flex items-center justify-center text-white text-xs font-bold'
+              style={{
+                borderRadius: personalizationSettings?.userAvatarStyle === 'square' ? '0.9rem' : '9999px',
+                background: 'linear-gradient(135deg, var(--accent-color), var(--accent-color-strong))'
+              }}
+            >
               {getInitials(user?.name)}
             </div>
           )}
@@ -55,12 +94,28 @@ const Message = ({ message }) => {
       )
       :
       (
-        <div className='inline-flex flex-col gap-2 p-3 px-5 max-w-3xl bg-[#F1E6FF] dark:bg-[#1B0F2B] border border-[#E2D4FF] dark:border-[#7C3AED]/30 rounded-2xl shadow-sm my-4'>
+        <div
+          className={`inline-flex flex-col gap-2 max-w-3xl border shadow-sm ${animationClass}`}
+          style={{
+            ...bubbleBaseStyle,
+            ...spacingStyle,
+            background: 'var(--chat-assistant-bg)',
+            borderColor: 'rgba(124,58,237,0.18)'
+          }}
+        >
+          {personalizationSettings?.showAssistantLabel && (
+            <span
+              className='text-[11px] font-semibold uppercase tracking-wide'
+              style={{ color: 'var(--chat-text-strong)' }}
+            >
+              {personalizationSettings?.assistantName || 'Axtro'}
+            </span>
+          )}
           {message.isImage ? (
             <img src={message.content} className='w-full max-w-md mt-2 rounded-md' alt='' />
           ) : 
           (
-            <div className="text-sm text-[#2F1B45] dark:text-[#F2E9FF] leading-relaxed reset-tw">
+            <div className="text-sm leading-relaxed reset-tw" style={{ color: 'var(--chat-text-strong)' }}>
               <Markdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[rehypeRaw, rehypePrism]}
@@ -70,7 +125,11 @@ const Message = ({ message }) => {
             </div>
           )
           }
-          <span className='text-xs text-[#8C7AB5] dark:text-[#D4C8F2]'>{moment(message.timestamp).locale('es').fromNow()}</span>
+          {showTimestamps && (
+            <span className='text-xs' style={{ color: 'var(--chat-text-strong)', opacity: 0.6 }}>
+              {moment(message.timestamp).locale('es').fromNow()}
+            </span>
+          )}
         </div>
       ) 
       }

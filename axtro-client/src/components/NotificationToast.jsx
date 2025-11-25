@@ -22,9 +22,9 @@ const NotificationToast = () => {
 
   return (
     <div className="fixed bottom-4 right-4 z-50 w-[min(90vw,320px)] animate-fade-in">
-      <div className="bg-white/95 dark:bg-[#1C1426]/95 border border-[#E2D4FF] dark:border-[#3B2A4F] rounded-2xl shadow-xl backdrop-blur p-4 flex gap-3">
+      <div className="bg-white/95 dark:bg-[#1C1426]/95 border border-[#E2D4FF] dark:border-[#3B2A4F] rounded-2xl shadow-xl backdrop-blur p-4 flex gap-3" style={{ borderColor: 'rgba(124,58,237,0.25)' }}>
         <div className="flex items-start justify-center pt-1">
-          <FiMessageCircle className="w-5 h-5 text-[#7C3AED]" />
+          <FiMessageCircle className="w-5 h-5" style={{ color: 'var(--accent-color)' }} />
         </div>
         <div className="flex-1">
           <p className="text-sm font-semibold text-[#1C1426] dark:text-white">{toast.title}</p>

@@ -4,11 +4,10 @@ import { useAppContext } from '../context/AppContext'
 import { authService } from '../services/authService'
 
 const Configuration = () => {
-  const { navigate, theme, setTheme, user, setUser, fetchUser, logout, notificationSettings, setNotificationSettings } = useAppContext()
+  const { navigate, theme, setTheme, user, setUser, fetchUser, logout, notificationSettings, setNotificationSettings, personalizationSettings, updatePersonalization } = useAppContext()
   const [activeSection, setActiveSection] = useState('general')
   const [settings, setSettings] = useState({
     aspecto: 'Sistema',
-    colorAcento: 'Predeterminada',
     idioma: 'Automático',
     idiomaHablado: 'Automático',
     voz: 'Breeze'
@@ -44,6 +43,211 @@ const Configuration = () => {
   const [deleteError, setDeleteError] = useState('')
   const [showDeletePassword, setShowDeletePassword] = useState(false)
 
+  const accentOptions = [
+    {
+      id: 'violet',
+      name: 'Atelier violeta',
+      description: 'Morados editoriales con matices lavanda, ideal para interfaces elegantes.',
+      colors: ['#7C3AED', '#9B5CFF', '#F1E6FF']
+    },
+    {
+      id: 'emerald',
+      name: 'Bruma esmeralda',
+      description: 'Verdes frescos con acentos azulados que combinan con fondos degradados.',
+      colors: ['#0CA678', '#34D399', '#E6FCF5']
+    },
+    {
+      id: 'sunset',
+      name: 'Atardecer cítrico',
+      description: 'Naranjas suaves con reflejos dorados para experiencias cálidas.',
+      colors: ['#F97316', '#FB923C', '#FFF4E6']
+    },
+    {
+      id: 'sand',
+      name: 'Costa terracota',
+      description: 'Arena y arcilla inspiradas en papel artesanal y tipografías redondeadas.',
+      colors: ['#F4A261', '#E9C46A', '#FDF4E3']
+    },
+    {
+      id: 'ocean',
+      name: 'Lago boreal',
+      description: 'Azules fríos que funcionan con fondos translúcidos o vítreos.',
+      colors: ['#2563EB', '#60A5FA', '#E0EDFF']
+    },
+    {
+      id: 'slate',
+      name: 'Blueprint nocturno',
+      description: 'Grafitos profundos con texto claro, perfecto para modo enfoque.',
+      colors: ['#0F172A', '#334155', '#CBD5F5']
+    },
+    {
+      id: 'neon',
+      name: 'Neón táctico',
+      description: 'Verdes eléctricos con contraste oscuro para dashboards futuristas.',
+      colors: ['#00FFD1', '#42A5F5', '#1E1C3B']
+    }
+  ]
+
+  const backgroundOptions = [
+    {
+      id: 'soft',
+      label: 'Bruma suave',
+      description: 'Base neutra ligeramente lavanda para layouts editoriales.',
+      preview: 'linear-gradient(135deg,#F8F5FF,#FFFFFF)'
+    },
+    {
+      id: 'gradient',
+      label: 'Aurora degradada',
+      description: 'Degradé atmosférico inspirado en cielos polares.',
+      preview: 'linear-gradient(135deg,#C084FC,#67E8F9)'
+    },
+    {
+      id: 'paper',
+      label: 'Papel artesanal',
+      description: 'Textura fibrosa con matiz crema para tonos cálidos.',
+      preview: 'repeating-linear-gradient(45deg,#FFF8ED 0 10px,#F5E8D8 10px 20px)'
+    },
+    {
+      id: 'glass',
+      label: 'Panel translúcido',
+      description: 'Efecto vidrio helado que resalta acentos saturados.',
+      preview: 'linear-gradient(120deg,rgba(255,255,255,0.6),rgba(255,255,255,0.2))'
+    },
+    {
+      id: 'darkfabric',
+      label: 'Lona nocturna',
+      description: 'Fondo oscuro texturizado pensado para tonos grafito.',
+      preview: 'radial-gradient(circle,#1A1026 0%,#08050E 100%)'
+    },
+    {
+      id: 'mesh',
+      label: 'Mesh experimental',
+      description: 'Manchas orgánicas vibrantes para temas neón.',
+      preview: 'radial-gradient(circle at 20% 20%,rgba(0,255,209,0.3),transparent 45%),radial-gradient(circle at 70% 0,rgba(91,33,182,0.35),transparent 40%)'
+    }
+  ]
+
+  const themePresets = [
+    {
+      id: 'atelier-editorial',
+      name: 'Atelier editorial',
+      description: 'Morados elegantes, fondo bruma suave y serif moderna para lecturas largas.',
+      accentPreset: 'violet',
+      backgroundStyle: 'soft',
+      fontFamily: 'serif',
+      fontScale: 'medium',
+      bubbleShape: 'rounded',
+      messageDensity: 'comfortable',
+      messageAnimations: 'gentle',
+      notificationSound: 'soft',
+      preview: ['#7C3AED', '#F1E6FF', '#4C1D95']
+    },
+    {
+      id: 'aurora-boreal',
+      name: 'Aurora boreal',
+      description: 'Verdes frescos + degradé polar y tipografía geométrica.',
+      accentPreset: 'emerald',
+      backgroundStyle: 'gradient',
+      fontFamily: 'outfit',
+      fontScale: 'medium',
+      bubbleShape: 'rounded',
+      messageDensity: 'comfortable',
+      messageAnimations: 'gentle',
+      notificationSound: 'soft',
+      preview: ['#34D399', '#67E8F9', '#0F172A']
+    },
+    {
+      id: 'costa-terracota',
+      name: 'Costa terracota',
+      description: 'Naranjas suaves, textura papel y Poppins para tono cálido y cercano.',
+      accentPreset: 'sand',
+      backgroundStyle: 'paper',
+      fontFamily: 'poppins',
+      fontScale: 'large',
+      bubbleShape: 'standard',
+      messageDensity: 'relaxed',
+      messageAnimations: 'gentle',
+      notificationSound: 'soft',
+      preview: ['#F4A261', '#FEEED8', '#7B341E']
+    },
+    {
+      id: 'midnight-blueprint',
+      name: 'Midnight blueprint',
+      description: 'Grafitos profundos sobre lona nocturna con Inter compacta.',
+      accentPreset: 'slate',
+      backgroundStyle: 'darkfabric',
+      fontFamily: 'inter',
+      fontScale: 'small',
+      bubbleShape: 'minimal',
+      messageDensity: 'compact',
+      messageAnimations: 'fade',
+      notificationSound: 'chime',
+      preview: ['#0F172A', '#1E1B4B', '#E2E8F0']
+    },
+    {
+      id: 'laguna-bruma',
+      name: 'Laguna bruma',
+      description: 'Azules frescos con panel translúcido y Outfit equilibrada.',
+      accentPreset: 'ocean',
+      backgroundStyle: 'glass',
+      fontFamily: 'outfit',
+      fontScale: 'medium',
+      bubbleShape: 'rounded',
+      messageDensity: 'comfortable',
+      messageAnimations: 'fade',
+      notificationSound: 'chime',
+      preview: ['#2563EB', '#9EB9FF', '#0B2257']
+    },
+  ]
+
+  const fontOptions = [
+    { id: 'outfit', label: 'Outfit' },
+    { id: 'inter', label: 'Inter' },
+    { id: 'poppins', label: 'Poppins' },
+    { id: 'serif', label: 'Serif clásica' },
+    { id: 'mono', label: 'Monoespaciada' }
+  ]
+
+  const fontScaleOptions = [
+    { id: 'small', label: 'Pequeña' },
+    { id: 'medium', label: 'Media' },
+    { id: 'large', label: 'Grande' }
+  ]
+
+  const densityOptions = [
+    { id: 'compact', label: 'Compacto' },
+    { id: 'comfortable', label: 'Cómodo' },
+    { id: 'relaxed', label: 'Amplio' }
+  ]
+
+  const bubbleOptions = [
+    { id: 'rounded', label: 'Redondeado' },
+    { id: 'standard', label: 'Clásico' },
+    { id: 'minimal', label: 'Cuadrado' }
+  ]
+
+  const animationOptions = [
+    { id: 'gentle', label: 'Suave' },
+    { id: 'fade', label: 'Deslizar' },
+    { id: 'none', label: 'Sin animación' }
+  ]
+
+  const soundOptions = [
+    { id: 'soft', label: 'Sutil' },
+    { id: 'chime', label: 'Campana' },
+    { id: 'off', label: 'Silenciar' }
+  ]
+
+  const sendOptions = [
+    { id: 'enter', label: 'Enter para enviar' },
+    { id: 'ctrlEnter', label: 'Ctrl/Cmd + Enter' }
+  ]
+
+  const avatarOptions = [
+    { id: 'circle', label: 'Circular' },
+    { id: 'square', label: 'Cuadrado' }
+  ]
+
   const menuItems = [
     { id: 'general', icon: FiSettings, label: 'General' },
     { id: 'notificaciones', icon: FiBell, label: 'Notificaciones' },
@@ -68,6 +272,20 @@ const Configuration = () => {
       ...prev,
       [key]: !prev[key]
     }))
+  }
+
+  const handleThemePresetApply = (preset) => {
+    updatePersonalization({
+      themePreset: preset.id,
+      accentPreset: preset.accentPreset,
+      backgroundStyle: preset.backgroundStyle,
+      fontFamily: preset.fontFamily,
+      fontScale: preset.fontScale,
+      bubbleShape: preset.bubbleShape,
+      messageDensity: preset.messageDensity,
+      messageAnimations: preset.messageAnimations,
+      notificationSound: preset.notificationSound
+    })
   }
 
   // Manejar cambio de email
@@ -490,6 +708,278 @@ const Configuration = () => {
     )
   }
 
+  const renderPersonalizationSettings = () => {
+    return (
+      <div className="space-y-6 sm:space-y-8">
+        {/* Temas rápidos */}
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Temas inteligentes</h3>
+              <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70">Combos modernos con colores, fondos y tipografías preseleccionadas.</p>
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {themePresets.map(preset => {
+              const isActive = personalizationSettings?.themePreset === preset.id
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => handleThemePresetApply(preset)}
+                  className={`text-left p-4 rounded-2xl border transition-colors ${isActive ? 'border-[#7C3AED] bg-[#F5EDFF]' : 'border-gray-200 dark:border-[#3B2A4F] hover:border-[#CBB5FF]'}`}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-base font-semibold text-[#1C1426] dark:text-white">{preset.name}</p>
+                      <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mt-1">{preset.description}</p>
+                    </div>
+                    <span className="text-xs px-3 py-1 rounded-full bg-[#7C3AED]/10 text-[#7C3AED] dark:text-[#E6CCFF]">
+                      {isActive ? 'Activo' : 'Aplicar'}
+                    </span>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    {preset.preview.map(color => (
+                      <span key={color} className="w-8 h-8 rounded-xl border border-white/40 shadow-sm" style={{ background: color }} />
+                    ))}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Tema y colores */}
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Colores destacados</h3>
+              <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70">Elige la personalidad visual del chat y cómo se resaltan los elementos.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {accentOptions.map(option => {
+              const isActive = personalizationSettings?.accentPreset === option.id
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => updatePersonalization({ accentPreset: option.id })}
+                  className={`p-4 rounded-2xl border transition-colors text-left ${isActive ? 'border-[#7C3AED] bg-[#F5EDFF]' : 'border-gray-200 dark:border-[#3B2A4F] hover:border-[#CBB5FF]'}`}
+                >
+                  <p className="font-semibold text-[#1C1426] dark:text-white">{option.name}</p>
+                  <p className="text-xs text-gray-600 dark:text-[#CFC0E6]/80 mt-1">{option.description}</p>
+                  <div className="flex gap-2 mt-3">
+                    {option.colors.map(color => (
+                      <span key={color} className="w-4 h-4 rounded-full border border-white shadow" style={{ background: color }}></span>
+                    ))}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {backgroundOptions.map(option => {
+              const isActive = personalizationSettings?.backgroundStyle === option.id
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => updatePersonalization({ backgroundStyle: option.id })}
+                  className={`text-left p-4 rounded-2xl border transition-colors ${isActive ? 'border-[#7C3AED] bg-[#F5EDFF]' : 'border-gray-200 dark:border-[#3B2A4F] hover:border-[#CBB5FF]'}`}
+                >
+                  <div
+                    className="h-16 rounded-xl border border-white/40 shadow-inner"
+                    style={{ background: option.preview, backgroundSize: 'cover' }}
+                  />
+                  <p className="font-semibold text-[#1C1426] dark:text-white mt-3">{option.label}</p>
+                  <p className="text-xs text-gray-600 dark:text-[#CFC0E6]/80 mt-1">{option.description}</p>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Tipografía */}
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Tipografía y tamaño</h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2 block">Fuente</label>
+              <select
+                value={personalizationSettings?.fontFamily}
+                onChange={(e) => updatePersonalization({ fontFamily: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-sm text-[#1C1426] dark:text-white"
+              >
+                {fontOptions.map(option => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2 block">Escala</label>
+              <div className="flex gap-2 flex-wrap">
+                {fontScaleOptions.map(option => {
+                  const isActive = personalizationSettings?.fontScale === option.id
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => updatePersonalization({ fontScale: option.id })}
+                      className={`flex-1 min-w-[110px] px-3 py-2 rounded-xl border text-sm font-medium transition ${isActive ? 'bg-[#7C3AED] text-white border-[#7C3AED]' : 'border-gray-300 dark:border-[#3B2A4F] text-[#4C1D95] dark:text-white'}`}
+                    >
+                      {option.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Diseño y densidad */}
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Diseño del chat</h3>
+          <div>
+            <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mb-2">Densidad de mensajes</p>
+            <div className="flex flex-wrap gap-2">
+              {densityOptions.map(option => {
+                const isActive = personalizationSettings?.messageDensity === option.id
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => updatePersonalization({ messageDensity: option.id })}
+                    className={`px-4 py-2 rounded-full border text-sm font-medium transition ${isActive ? 'bg-[#7C3AED] text-white border-[#7C3AED]' : 'border-gray-300 dark:border-[#3B2A4F] text-[#4C1D95] dark:text-white'}`}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-4">
+            <label className="flex items-center gap-3 text-sm text-[#1C1426] dark:text-[#E6CCFF]">
+              <input
+                type="checkbox"
+                checked={personalizationSettings?.showTimestamps !== false}
+                onChange={() => updatePersonalization({ showTimestamps: personalizationSettings?.showTimestamps === false })}
+                className="rounded border-gray-300 text-[#7C3AED] focus:ring-[#7C3AED]"
+              />
+              Mostrar horas en cada mensaje
+            </label>
+            <label className="flex items-center gap-3 text-sm text-[#1C1426] dark:text-[#E6CCFF]">
+              <input
+                type="checkbox"
+                checked={personalizationSettings?.sidebarPosition === 'right'}
+                onChange={() => updatePersonalization({ sidebarPosition: personalizationSettings?.sidebarPosition === 'right' ? 'left' : 'right' })}
+                className="rounded border-gray-300 text-[#7C3AED] focus:ring-[#7C3AED]"
+              />
+              Fijar menú a la derecha
+            </label>
+          </div>
+        </div>
+
+        {/* Alias y burbujas */}
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Alias y burbujas</h3>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2 block">Nombre de la IA</label>
+              <input
+                type="text"
+                value={personalizationSettings?.assistantName || ''}
+                onChange={(e) => updatePersonalization({ assistantName: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-sm text-[#1C1426] dark:text-white"
+                placeholder="Escribe un alias"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF]">Mostrar etiqueta</label>
+              <label className="flex items-center gap-3 text-sm text-[#1C1426] dark:text-[#E6CCFF]">
+                <input
+                  type="checkbox"
+                  checked={personalizationSettings?.showAssistantLabel}
+                  onChange={() => updatePersonalization({ showAssistantLabel: !personalizationSettings?.showAssistantLabel })}
+                  className="rounded border-gray-300 text-[#7C3AED] focus:ring-[#7C3AED]"
+                />
+                Mostrar el nombre sobre cada respuesta
+              </label>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {avatarOptions.map(option => {
+              const isActive = personalizationSettings?.userAvatarStyle === option.id
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => updatePersonalization({ userAvatarStyle: option.id })}
+                  className={`px-4 py-2 rounded-full border text-sm font-medium transition ${isActive ? 'bg-[#7C3AED] text-white border-[#7C3AED]' : 'border-gray-300 dark:border-[#3B2A4F] text-[#4C1D95] dark:text-white'}`}
+                >
+                  Avatar {option.label}
+                </button>
+              )
+            })}
+            {bubbleOptions.map(option => {
+              const isActive = personalizationSettings?.bubbleShape === option.id
+              return (
+                <button
+                  key={option.id}
+                  onClick={() => updatePersonalization({ bubbleShape: option.id })}
+                  className={`px-4 py-2 rounded-full border text-sm font-medium transition ${isActive ? 'bg-[#7C3AED] text-white border-[#7C3AED]' : 'border-gray-300 dark:border-[#3B2A4F] text-[#4C1D95] dark:text-white'}`}
+                >
+                  Burbujas {option.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Animaciones, sonido y atajos */}
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6 space-y-4">
+          <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Animaciones y sonido</h3>
+          <div className="grid sm:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2 block">Animación</label>
+              <select
+                value={personalizationSettings?.messageAnimations}
+                onChange={(e) => updatePersonalization({ messageAnimations: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-sm text-[#1C1426] dark:text-white"
+              >
+                {animationOptions.map(option => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2 block">Sonido al responder</label>
+              <select
+                value={personalizationSettings?.notificationSound}
+                onChange={(e) => updatePersonalization({ notificationSound: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-sm text-[#1C1426] dark:text-white"
+              >
+                {soundOptions.map(option => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2 block">Atajo para enviar</label>
+              <select
+                value={personalizationSettings?.sendBehavior}
+                onChange={(e) => updatePersonalization({ sendBehavior: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-sm text-[#1C1426] dark:text-white"
+              >
+                {sendOptions.map(option => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 dark:text-[#CFC0E6]/60 mt-1">
+                Perfecto si prefieres escribir varias líneas antes de enviar.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const renderGeneralSettings = () => {
     return (
       <div className="space-y-4 sm:space-y-6">
@@ -502,15 +992,6 @@ const Configuration = () => {
           </div>
         </div>
 
-        {/* Color de acento */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
-          <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Color de acento</span>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded-full bg-gray-400 border border-gray-300 flex-shrink-0"></div>
-            <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.colorAcento}</span>
-            <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
-          </div>
-        </div>
 
         {/* Idioma */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
@@ -536,7 +1017,7 @@ const Configuration = () => {
         </div>
 
         {/* Voz */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3">
+        {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3">
           <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Voz</span>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <button className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6931C9] transition-colors cursor-pointer">
@@ -548,7 +1029,7 @@ const Configuration = () => {
               <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     )
   }
@@ -560,7 +1041,7 @@ const Configuration = () => {
       case 'notificaciones':
         return renderNotificationSettings()
       case 'personalizacion':
-        return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Configuración de personalización</div>
+        return renderPersonalizationSettings()
       case 'seguridad':
         return renderSecuritySettings()
       case 'cuenta':

@@ -18,7 +18,7 @@ import NotificationToast from './components/NotificationToast'
 
 const App = () => {
 
-  const { user, isInformationOpen, setIsInformationOpen } = useAppContext()
+  const { user, isInformationOpen, setIsInformationOpen, personalizationSettings } = useAppContext()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { pathname } = useLocation()
@@ -42,7 +42,14 @@ const App = () => {
       </button>
     )}
     {user ? (
-      <div className='bg-[#F7F4FF] dark:bg-[#0F0618] transition-colors duration-300'>
+      <div
+        className='transition-colors duration-300 min-h-screen'
+        style={{
+          background: 'var(--app-background)',
+          backgroundImage: 'var(--app-texture)',
+          backgroundSize: 'var(--app-texture-size)'
+        }}
+      >
         {/* Overlay para móvil cuando el menú está abierto */}
         {isMenuOpen && (
           <div 
@@ -50,7 +57,7 @@ const App = () => {
             className='fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-40 md:hidden animate-fade-in'
           />
         )}
-        <div className='flex h-screen w-screen'>
+        <div className={`flex h-screen w-screen ${personalizationSettings?.sidebarPosition === 'right' ? 'flex-row-reverse' : ''}`}>
           <Sidebar isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
           <Routes>
             <Route path='/' element={<ChatBox/>} />

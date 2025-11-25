@@ -247,7 +247,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
       </div> */}
 
       {/* Dark Mode Toggle */}
-      <div className='flex items-center justify-between gap-2 p-3 mt-4 border border-[#D8C8FF] dark:border-[#3B2A4F] bg-white/40 dark:bg-[#20152E] rounded-md'>
+      {/* <div className='flex items-center justify-between gap-2 p-3 mt-4 border border-[#D8C8FF] dark:border-[#3B2A4F] bg-white/40 dark:bg-[#20152E] rounded-md'>
         <div className='flex items-center gap-2 text-sm text-[#4C1D95] dark:text-white'>
           <img src={assets.theme_icon} className='w-4 not-dark:invert opacity-70' alt="" />
           <p>Modo Oscuro</p>
@@ -258,7 +258,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           </div>
           <span className='absolute left-1 top-1 w-3 h-3 bg-white rounded-full transition-transform peer-checked:translate-x-4'></span>
         </label>
-      </div>
+      </div> */}
 
       {/* User Account */}
       <div className='relative' ref={userMenuRef}>

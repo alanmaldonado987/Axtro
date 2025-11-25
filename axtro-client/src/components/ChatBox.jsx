@@ -27,8 +27,9 @@ const ChatBox = () => {
   const recognitionRef = useRef(null)
   const abortControllerRef = useRef(null)
   const selectedChatIdRef = useRef(null)
+  const audioContextRef = useRef(null)
 
-  const { selectedChat, theme, setChats, setSelectedChat, fetchUserChats, notificationSettings, pushNotification } = useAppContext()
+  const { selectedChat, setChats, setSelectedChat, fetchUserChats, notificationSettings, pushNotification, personalizationSettings } = useAppContext()
   const location = useLocation()
   const messages = selectedChat?.messages || []
 
@@ -94,6 +95,35 @@ const ChatBox = () => {
     selectedChatIdRef.current = selectedChat?._id || null
   }, [selectedChat?._id])
 
+  const playReplySound = async () => {
+    if (personalizationSettings?.notificationSound === 'off') return
+    const SoundContext = window.AudioContext || window.webkitAudioContext
+    if (!SoundContext) return
+    if (!audioContextRef.current) {
+      audioContextRef.current = new SoundContext()
+    }
+    const ctx = audioContextRef.current
+    if (ctx.state === 'suspended') {
+      try {
+        await ctx.resume()
+      } catch (error) {
+        console.error('No se pudo reanudar el contexto de audio', error)
+      }
+    }
+    const osc = ctx.createOscillator()
+    const gain = ctx.createGain()
+    const now = ctx.currentTime
+    const isChime = personalizationSettings?.notificationSound === 'chime'
+    osc.type = isChime ? 'triangle' : 'sine'
+    osc.frequency.setValueAtTime(isChime ? 680 : 540, now)
+    gain.gain.setValueAtTime(0.0001, now)
+    gain.gain.exponentialRampToValueAtTime(0.08, now + 0.01)
+    gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.4)
+    osc.connect(gain).connect(ctx.destination)
+    osc.start(now)
+    osc.stop(now + 0.4)
+  }
+
   const appendMessagesToChat = (chatId, newMessages) => {
     if (!chatId) return
     setChats(prev => prev.map(chat => {
@@ -105,8 +135,7 @@ const ChatBox = () => {
     setSelectedChat(prev => prev && prev._id === chatId ? { ...prev, messages: [...prev.messages, ...newMessages], updatedAt: Date.now() } : prev)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const processSubmit = async () => {
     if (!selectedChat?._id || !prompt.trim() || sending) return
     const chatId = selectedChat._id
     const chatName = selectedChat.name || 'tu chat'
@@ -118,17 +147,17 @@ const ChatBox = () => {
     setSending(true)
     setSendingChatId(chatId)
     
-    // Crear AbortController para poder cancelar la petición
     abortControllerRef.current = new AbortController()
     const signal = abortControllerRef.current.signal
 
     try {
       const response = mode === 'imagen'
-        ? await messageService.sendImageMessage(selectedChat._id, userMessage.content, isPublished, signal)
-        : await messageService.sendTextMessage(selectedChat._id, userMessage.content, signal)
+        ? await messageService.sendImageMessage(chatId, userMessage.content, isPublished, signal)
+        : await messageService.sendTextMessage(chatId, userMessage.content, signal)
 
       if (response.success && response.reply) {
         appendMessagesToChat(chatId, [response.reply])
+        playReplySound()
         const isViewingChat = location.pathname === '/' && selectedChatIdRef.current === chatId && !document.hidden
         if (notificationSettings?.newMessageAlerts && !isViewingChat) {
           pushNotification({
@@ -174,6 +203,11 @@ const ChatBox = () => {
     }
   }
 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    await processSubmit()
+  }
+
   const handleStop = () => {
     if (abortControllerRef.current && sending) {
       abortControllerRef.current.abort()
@@ -205,6 +239,16 @@ const ChatBox = () => {
     }
   }
 
+  const handlePromptKeyDown = (e) => {
+    if (personalizationSettings?.sendBehavior !== 'ctrlEnter') return
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault()
+      processSubmit()
+    } else if (e.key === 'Enter') {
+      e.preventDefault()
+    }
+  }
+
   useEffect(()=>{
     if(messages.length === 0){
       setEmptyPrompt(getRandomEmptyPrompt())
@@ -226,9 +270,8 @@ const ChatBox = () => {
       {/* Chat Messages */}
       <div ref={containerRef} className='flex-1 mb-5 overflow-y-scroll'>
         {messages.length === 0 && (
-          <div className='h-full flex flex-col items-center justify-center gap-2 text-[#7C3AED]'>
-            {/* <img src={ theme === 'dark' ? assets.logo_full : assets.logo_full_dark } className='w-full max-w-56 sm:max-w-68' alt="" /> */}
-            <p className='mt-5 text-4xl sm:text-6xl text-center text-[#7C3AED] dark:text-[#E6CCFF]'>{emptyPrompt}</p>
+          <div className='h-full flex flex-col items-center justify-center gap-2'>
+            <p className='mt-5 text-4xl sm:text-6xl text-center' style={{ color: 'var(--accent-color)' }}>{emptyPrompt}</p>
           </div>
         )}
 
@@ -237,9 +280,9 @@ const ChatBox = () => {
         {/* Tree Dots Loading */}
         {
           sending && selectedChat?._id === sendingChatId && <div className='loader flex items-center gap-1.5'>
-              <div className='w-1.5 h-1.5 rounded-full bg-[#A07BDD] dark:bg-white animate-bounce'></div>
-              <div className='w-1.5 h-1.5 rounded-full bg-[#8D6BC7] dark:bg-white animate-bounce'></div>
-              <div className='w-1.5 h-1.5 rounded-full bg-[#7C5AB8] dark:bg-white animate-bounce'></div>
+              <div className='w-1.5 h-1.5 rounded-full animate-bounce' style={{ backgroundColor: 'var(--accent-color)' }}></div>
+              <div className='w-1.5 h-1.5 rounded-full animate-bounce' style={{ backgroundColor: 'var(--accent-color-strong)', animationDelay: '0.15s' }}></div>
+              <div className='w-1.5 h-1.5 rounded-full animate-bounce' style={{ backgroundColor: 'var(--accent-color)', animationDelay: '0.3s', opacity: 0.8 }}></div>
             </div>
         }
       </div>
@@ -256,16 +299,48 @@ const ChatBox = () => {
       )}
 
       {/* Prompt Input Box */}
-      <form onSubmit={handleSubmit} className='bg-[#F1E6FF] dark:bg-[#2B1B3D] border border-[#D8C8FF] dark:border-[#3B2A4F] rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center text-[#4C1D95] dark:text-white'>
-        <select onChange={(e)=>setMode(e.target.value)} value={mode} className='text-sm pl-3 pr-2 outline-none bg-transparent text-[#4C1D95] dark:text-white'>
-          <option className='text-[#4C1D95]' value="texto">Texto</option>
-          <option className='text-[#4C1D95]' value="imagen">Imagen</option>
+      <form
+        onSubmit={handleSubmit}
+        className='rounded-full w-full max-w-2xl p-3 pl-4 mx-auto flex gap-4 items-center text-[#4C1D95] dark:text-white border'
+        style={{
+          background: 'var(--accent-soft-bg)',
+          borderColor: 'rgba(124,58,237,0.25)',
+          color: 'var(--chat-text-strong)'
+        }}
+      >
+        <select
+          onChange={(e)=>setMode(e.target.value)}
+          value={mode}
+          className='text-sm pl-3 pr-2 outline-none bg-transparent'
+          style={{ color: 'var(--chat-text-strong)' }}
+        >
+          <option className='text-inherit bg-white text-[#1C1426]' value="texto">Texto</option>
+          <option className='text-inherit bg-white text-[#1C1426]' value="imagen">Imagen</option>
         </select>
-        <input onChange={(e)=>setPrompt(e.target.value)} value={prompt} className='flex-1 w-full text-sm outline-none bg-transparent text-[#33204D] dark:text-white placeholder:text-[#B19CD6]' type="text" placeholder='Escribe aquí...' required disabled={!selectedChat} />
+        <input
+          onChange={(e)=>setPrompt(e.target.value)}
+          onKeyDown={handlePromptKeyDown}
+          value={prompt}
+          className='flex-1 w-full text-sm outline-none bg-transparent text-[#33204D] dark:text-white placeholder:text-[#B19CD6]'
+          type="text"
+          placeholder={personalizationSettings?.sendBehavior === 'ctrlEnter' ? 'Escribe y presiona Ctrl+Enter…' : 'Escribe aquí…'}
+          required
+          disabled={!selectedChat}
+        />
         <button
           type="button"
           onClick={handleMicToggle}
-          className={`relative p-2 rounded-full transition-all cursor-pointer border ${isListening ? 'bg-[#7C3AED] text-white border-[#BFA0FF] shadow-[0_0_18px_rgba(124,58,237,0.5)]' : 'bg-[#E5D9FF] dark:bg-[#3A2751] text-[#4C1D95] dark:text-white border-transparent hover:bg-[#DCC6FF] dark:hover:bg-[#4A2C67]'}`}
+          className='relative p-2 rounded-full transition-all cursor-pointer border'
+          style={isListening ? {
+            background: 'var(--accent-color)',
+            color: '#fff',
+            borderColor: 'var(--accent-color)',
+            boxShadow: '0 0 18px rgba(124,58,237,0.45)'
+          } : {
+            background: 'var(--accent-soft-bg)',
+            color: 'var(--chat-text-strong)',
+            borderColor: 'rgba(0,0,0,0.08)'
+          }}
           title={isListening ? 'Detener dictado' : 'Dictar con micrófono'}
           disabled={!selectedChat}
         >
