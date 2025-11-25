@@ -53,7 +53,9 @@ passport.use(new GoogleStrategy({
                 user.provider = 'google';
                 user.providerId = profile.id;
                 if (profile.photos && profile.photos[0]) {
-                    user.profilePicture = profile.photos[0].value;
+                    user.profilePicture = profile.photos[0].value.replace('=s96-c','=s200');
+                } else {
+                    user.profilePicture = null;
                 }
                 await user.save();
             }
@@ -65,7 +67,7 @@ passport.use(new GoogleStrategy({
             email: profile.emails[0].value,
             provider: 'google',
             providerId: profile.id,
-            profilePicture: profile.photos && profile.photos[0] ? profile.photos[0].value : null,
+            profilePicture: profile.photos && profile.photos[0] ? profile.photos[0].value.replace('=s96-c','=s200') : null,
             password: null // No se requiere password para OAuth
         });
 

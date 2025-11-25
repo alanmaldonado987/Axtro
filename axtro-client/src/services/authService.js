@@ -187,5 +187,66 @@ export const authService = {
     }
     window.location.href = `${apiUrl}/api/auth/facebook`;
   },
+
+  /**
+   * Cambia el correo electrónico del usuario
+   * @param {string} newEmail - Nuevo correo electrónico
+   * @param {string} password - Contraseña actual para verificación
+   * @returns {Promise<{success: boolean, user?: object, message?: string}>}
+   */
+  async changeEmail(newEmail, password) {
+    try {
+      const response = await axiosClient.put('/user/change-email', {
+        newEmail,
+        password,
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al cambiar el correo electrónico',
+      };
+    }
+  },
+
+  /**
+   * Cambia la contraseña del usuario
+   * @param {string} currentPassword - Contraseña actual
+   * @param {string} newPassword - Nueva contraseña
+   * @returns {Promise<{success: boolean, message?: string}>}
+   */
+  async changePassword(currentPassword, newPassword) {
+    try {
+      const response = await axiosClient.put('/user/change-password', {
+        currentPassword,
+        newPassword,
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al cambiar la contraseña',
+      };
+    }
+  },
+
+  /**
+   * Elimina la cuenta del usuario
+   * @param {string} password - Contraseña para confirmar (opcional para usuarios OAuth)
+   * @returns {Promise<{success: boolean, message?: string}>}
+   */
+  async deleteAccount(password) {
+    try {
+      const response = await axiosClient.delete('/user/delete', {
+        data: { password },
+      });
+      return response.data;
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Error al eliminar la cuenta',
+      };
+    }
+  },
 };
 

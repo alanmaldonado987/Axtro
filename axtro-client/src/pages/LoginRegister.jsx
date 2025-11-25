@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { FaGooglePlusG, FaFacebookF } from "react-icons/fa";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff, FiX } from "react-icons/fi";
 import { authService } from "../services/authService";
 import { useAppContext } from "../context/AppContext";
 import ForgotPassword from "./ForgotPassword";
@@ -28,6 +28,7 @@ const LoginRegister = () => {
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showFacebookModal, setShowFacebookModal] = useState(false);
   const transitionTimeoutRef = useRef(null);
 
   const handleRegister = async (e) => {
@@ -195,7 +196,7 @@ const LoginRegister = () => {
 
                 <div className="flex gap-3 mb-4 justify-center">
                   <Icon onClick={() => authService.loginWithGoogle()}><FaGooglePlusG /></Icon>
-                  <Icon onClick={() => authService.loginWithFacebook()}><FaFacebookF /></Icon>
+                  <Icon onClick={() => setShowFacebookModal(true)}><FaFacebookF /></Icon>
                 </div>
 
                 <span className="text-xs text-gray-600 mb-4 block text-center">Prefiere tu correo y contraseña si así te sientes más cómodo.</span>
@@ -257,8 +258,8 @@ const LoginRegister = () => {
                 </p>
 
                 <div className="flex gap-3 mb-4 justify-center">
-                  <Icon><FaGooglePlusG /></Icon>
-                  <Icon><FaFacebookF /></Icon>
+                  <Icon onClick={() => authService.loginWithGoogle()}><FaGooglePlusG /></Icon>
+                  <Icon onClick={() => setShowFacebookModal(true)}><FaFacebookF /></Icon>
                 </div>
 
                 <span className="text-xs text-gray-600 mb-4 block text-center">También puedes usar tu correo para registrarte.</span>
@@ -340,7 +341,7 @@ const LoginRegister = () => {
 
           <div className="flex gap-3 mb-6">
             <Icon onClick={() => authService.loginWithGoogle()}><FaGooglePlusG /></Icon>
-            <Icon onClick={() => authService.loginWithFacebook()}><FaFacebookF /></Icon>
+            <Icon onClick={() => setShowFacebookModal(true)}><FaFacebookF /></Icon>
           </div>
 
           <span className="text-xs text-gray-600 mb-4">También puedes usar tu correo para registrarte.</span>
@@ -412,7 +413,7 @@ const LoginRegister = () => {
 
           <div className="flex gap-3 mb-6">
             <Icon onClick={() => authService.loginWithGoogle()}><FaGooglePlusG /></Icon>
-            <Icon onClick={() => authService.loginWithFacebook()}><FaFacebookF /></Icon>
+            <Icon onClick={() => setShowFacebookModal(true)}><FaFacebookF /></Icon>
           </div>
 
           <span className="text-xs text-gray-600 mb-4">Prefiere tu correo y contraseña si así te sientes más cómodo.</span>
@@ -516,6 +517,52 @@ const LoginRegister = () => {
         </div>
       </div>
       <ForgotPassword isOpen={isForgotPasswordOpen} onClose={() => setIsForgotPasswordOpen(false)} />
+      
+      {/* Modal de Facebook en desarrollo */}
+      {showFacebookModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 dark:bg-black/70 backdrop-blur-sm p-4 animate-fade-in"
+          onClick={() => setShowFacebookModal(false)}
+        >
+          <div 
+            className="bg-white dark:bg-[#1C1426] rounded-2xl shadow-2xl max-w-md w-full border border-[#E2D4FF] dark:border-[#3B2A4F] overflow-hidden animate-fade-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-[#E2D4FF] dark:border-[#3B2A4F] bg-[#F8F4FF] dark:bg-[#2B1B3D]">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#1877F2] rounded-lg">
+                  <FaFacebookF className="text-white text-xl" />
+                </div>
+                <h2 className="text-xl font-bold text-[#4C1D95] dark:text-[#E6CCFF]">Funcionalidad en desarrollo</h2>
+              </div>
+              <button
+                onClick={() => setShowFacebookModal(false)}
+                className="p-2 hover:bg-[#E5D9FF] dark:hover:bg-[#3A2751] rounded-lg transition-colors cursor-pointer"
+              >
+                <FiX className="text-[#4C1D95] dark:text-[#E6CCFF] text-xl" />
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 text-center">
+              <p className="text-[#6B4AA6] dark:text-[#CFC0E6] mb-6">
+                Esta funcionalidad se encuentra en desarrollo. Por favor, utiliza otra opción para iniciar sesión o registrarte.
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-[#E2D4FF] dark:border-[#3B2A4F] bg-[#F8F4FF] dark:bg-[#2B1B3D]">
+              <button
+                onClick={() => setShowFacebookModal(false)}
+                className="w-full py-2.5 px-4 bg-[#7C3AED] hover:bg-[#6931C9] text-white font-semibold rounded-lg transition-colors text-sm cursor-pointer"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

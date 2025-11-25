@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
-import { FiSettings, FiBell, FiClock, FiLink, FiDatabase, FiLock, FiUsers, FiUser, FiX, FiChevronDown, FiPlay } from 'react-icons/fi'
+import { FiSettings, FiBell, FiClock, FiLock, FiUser, FiX, FiChevronDown, FiPlay, FiEye, FiEyeOff } from 'react-icons/fi'
 import { useAppContext } from '../context/AppContext'
+import { authService } from '../services/authService'
 
 const Configuration = () => {
-  const { navigate, theme, setTheme } = useAppContext()
+  const { navigate, theme, setTheme, user, setUser, fetchUser, logout } = useAppContext()
   const [activeSection, setActiveSection] = useState('general')
   const [settings, setSettings] = useState({
     aspecto: 'Sistema',
@@ -13,14 +14,41 @@ const Configuration = () => {
     voz: 'Breeze'
   })
 
+  // Estados para cambio de email
+  const [emailForm, setEmailForm] = useState({
+    newEmail: '',
+    password: ''
+  })
+  const [emailLoading, setEmailLoading] = useState(false)
+  const [emailError, setEmailError] = useState('')
+  const [emailSuccess, setEmailSuccess] = useState('')
+  const [showEmailPassword, setShowEmailPassword] = useState(false)
+
+  // Estados para cambio de contraseña
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  })
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [passwordError, setPasswordError] = useState('')
+  const [passwordSuccess, setPasswordSuccess] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [deleteForm, setDeleteForm] = useState({
+    password: '',
+    confirmText: ''
+  })
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+  const [showDeletePassword, setShowDeletePassword] = useState(false)
+
   const menuItems = [
     { id: 'general', icon: FiSettings, label: 'General' },
     { id: 'notificaciones', icon: FiBell, label: 'Notificaciones' },
     { id: 'personalizacion', icon: FiClock, label: 'Personalización' },
-    { id: 'aplicaciones', icon: FiLink, label: 'Aplicaciones y conecto...' },
-    { id: 'datos', icon: FiDatabase, label: 'Controles de datos' },
     { id: 'seguridad', icon: FiLock, label: 'Seguridad' },
-    { id: 'parentales', icon: FiUsers, label: 'Controles parentales' },
     { id: 'cuenta', icon: FiUser, label: 'Cuenta' }
   ]
 
@@ -33,6 +61,370 @@ const Configuration = () => {
       ...prev,
       [key]: value
     }))
+  }
+
+  // Manejar cambio de email
+  const handleEmailChange = async (e) => {
+    e.preventDefault()
+    setEmailError('')
+    setEmailSuccess('')
+
+    if (!emailForm.newEmail || !emailForm.password) {
+      setEmailError('Todos los campos son requeridos')
+      return
+    }
+
+    setEmailLoading(true)
+    try {
+      const response = await authService.changeEmail(emailForm.newEmail, emailForm.password)
+      if (response.success) {
+        setEmailSuccess('Correo electrónico actualizado correctamente')
+        setEmailForm({ newEmail: '', password: '' })
+        // Actualizar usuario en el contexto
+        if (response.user) {
+          setUser(response.user)
+        } else {
+          await fetchUser()
+        }
+        setTimeout(() => setEmailSuccess(''), 3000)
+      } else {
+        setEmailError(response.message || 'Error al cambiar el correo')
+      }
+    } catch (error) {
+      setEmailError('Error al cambiar el correo electrónico')
+    } finally {
+      setEmailLoading(false)
+    }
+  }
+
+  // Manejar cambio de contraseña
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    setPasswordError('')
+    setPasswordSuccess('')
+
+    if (!passwordForm.currentPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+      setPasswordError('Todos los campos son requeridos')
+      return
+    }
+
+    if (passwordForm.newPassword.length < 6) {
+      setPasswordError('La nueva contraseña debe tener al menos 6 caracteres')
+      return
+    }
+
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordError('Las contraseñas no coinciden')
+      return
+    }
+
+    setPasswordLoading(true)
+    try {
+      const response = await authService.changePassword(passwordForm.currentPassword, passwordForm.newPassword)
+      if (response.success) {
+        setPasswordSuccess('Contraseña actualizada correctamente')
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' })
+        setTimeout(() => setPasswordSuccess(''), 3000)
+      } else {
+        setPasswordError(response.message || 'Error al cambiar la contraseña')
+      }
+    } catch (error) {
+      setPasswordError('Error al cambiar la contraseña')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
+
+  // Manejar eliminación de cuenta
+  const handleDeleteAccount = async (e) => {
+    e.preventDefault()
+    setDeleteError('')
+
+    const isOAuthUser = user?.provider
+
+    // Para usuarios OAuth, solo requiere confirmación de texto
+    if (isOAuthUser) {
+      if (deleteForm.confirmText !== 'ELIMINAR') {
+        setDeleteError('Por favor escribe "ELIMINAR" para confirmar')
+        return
+      }
+    } else {
+      // Para usuarios normales, requiere contraseña y confirmación
+      if (!deleteForm.password || deleteForm.confirmText !== 'ELIMINAR') {
+        setDeleteError('Por favor completa todos los campos correctamente')
+        return
+      }
+    }
+
+    setDeleteLoading(true)
+    try {
+      const response = await authService.deleteAccount(deleteForm.password || null)
+      if (response.success) {
+        // Cerrar sesión y redirigir
+        logout()
+        navigate('/login?message=account_deleted')
+      } else {
+        setDeleteError(response.message || 'Error al eliminar la cuenta')
+      }
+    } catch (error) {
+      setDeleteError('Error al eliminar la cuenta')
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  const renderSecuritySettings = () => {
+    const isOAuthUser = user?.provider
+
+    return (
+      <div className="space-y-6 sm:space-y-8">
+        {/* Cambiar correo electrónico */}
+        <div className="border-b border-gray-200 dark:border-[#3B2A4F] pb-6">
+          <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+            Cambiar correo electrónico
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mb-4">
+            {isOAuthUser 
+              ? `Tu cuenta está vinculada con ${user.provider === 'google' ? 'Google' : 'Facebook'}. No puedes cambiar tu correo desde aquí.`
+              : 'Actualiza tu dirección de correo electrónico. Se requiere tu contraseña actual para confirmar el cambio.'
+            }
+          </p>
+          
+          {!isOAuthUser && (
+            <form onSubmit={handleEmailChange} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+                  Nuevo correo electrónico
+                </label>
+                <input
+                  type="email"
+                  value={emailForm.newEmail}
+                  onChange={(e) => setEmailForm({ ...emailForm, newEmail: e.target.value })}
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] dark:focus:ring-[#9B5CFF]"
+                  placeholder="nuevo@correo.com"
+                  disabled={emailLoading}
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+                  Contraseña actual
+                </label>
+                <div className="relative">
+                  <input
+                    type={showEmailPassword ? 'text' : 'password'}
+                    value={emailForm.password}
+                    onChange={(e) => setEmailForm({ ...emailForm, password: e.target.value })}
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] dark:focus:ring-[#9B5CFF]"
+                    placeholder="Ingresa tu contraseña actual"
+                    disabled={emailLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEmailPassword(!showEmailPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#CFC0E6] hover:text-[#7C3AED] dark:hover:text-[#9B5CFF]"
+                  >
+                    {showEmailPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {emailError && (
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="text-sm text-red-600 dark:text-red-400">{emailError}</p>
+                </div>
+              )}
+
+              {emailSuccess && (
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                  <p className="text-sm text-green-600 dark:text-green-400">{emailSuccess}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={emailLoading}
+                className="px-6 py-2 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6931C9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                {emailLoading ? 'Actualizando...' : 'Actualizar correo'}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* Cambiar contraseña */}
+        <div className="pb-6">
+          <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+            Cambiar contraseña
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mb-4">
+            {isOAuthUser
+              ? `Tu cuenta está vinculada con ${user.provider === 'google' ? 'Google' : 'Facebook'}. No puedes cambiar tu contraseña desde aquí.`
+              : 'Actualiza tu contraseña. Se requiere tu contraseña actual para confirmar el cambio.'
+            }
+          </p>
+
+          {!isOAuthUser && (
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+                  Contraseña actual
+                </label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    value={passwordForm.currentPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] dark:focus:ring-[#9B5CFF]"
+                    placeholder="Ingresa tu contraseña actual"
+                    disabled={passwordLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#CFC0E6] hover:text-[#7C3AED] dark:hover:text-[#9B5CFF]"
+                  >
+                    {showCurrentPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+                  Nueva contraseña
+                </label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] dark:focus:ring-[#9B5CFF]"
+                    placeholder="Mínimo 6 caracteres"
+                    disabled={passwordLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#CFC0E6] hover:text-[#7C3AED] dark:hover:text-[#9B5CFF]"
+                  >
+                    {showNewPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+                  Confirmar nueva contraseña
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-[#7C3AED] dark:focus:ring-[#9B5CFF]"
+                    placeholder="Confirma tu nueva contraseña"
+                    disabled={passwordLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#CFC0E6] hover:text-[#7C3AED] dark:hover:text-[#9B5CFF]"
+                  >
+                    {showConfirmPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {passwordError && (
+                <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                  <p className="text-sm text-red-600 dark:text-red-400">{passwordError}</p>
+                </div>
+              )}
+
+              {passwordSuccess && (
+                <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800">
+                  <p className="text-sm text-green-600 dark:text-green-400">{passwordSuccess}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={passwordLoading}
+                className="px-6 py-2 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6931C9] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              >
+                {passwordLoading ? 'Actualizando...' : 'Actualizar contraseña'}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* Eliminar cuenta */}
+        <div className="border-t border-red-200 dark:border-red-800 pt-6">
+          <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
+            Eliminar cuenta
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mb-4">
+            Esta acción es permanente e irreversible. Se eliminarán todos tus datos, chats y configuraciones. 
+            {!isOAuthUser && ' Se requiere tu contraseña para confirmar.'}
+          </p>
+
+          <form onSubmit={handleDeleteAccount} className="space-y-4">
+            {!isOAuthUser && (
+              <div>
+                <label className="block text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <input
+                    type={showDeletePassword ? 'text' : 'password'}
+                    value={deleteForm.password}
+                    onChange={(e) => setDeleteForm({ ...deleteForm, password: e.target.value })}
+                    className="w-full px-4 py-2 pr-10 rounded-lg border border-red-300 dark:border-red-700 bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-600"
+                    placeholder="Ingresa tu contraseña"
+                    disabled={deleteLoading}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowDeletePassword(!showDeletePassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#CFC0E6] hover:text-red-600 dark:hover:text-red-400"
+                  >
+                    {showDeletePassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div>
+              <label className="block text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2">
+                Escribe <span className="font-bold text-red-600 dark:text-red-400">ELIMINAR</span> para confirmar
+              </label>
+              <input
+                type="text"
+                value={deleteForm.confirmText}
+                onChange={(e) => setDeleteForm({ ...deleteForm, confirmText: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-red-300 dark:border-red-700 bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-600"
+                placeholder="ELIMINAR"
+                disabled={deleteLoading}
+              />
+            </div>
+
+            {deleteError && (
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                <p className="text-sm text-red-600 dark:text-red-400">{deleteError}</p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={deleteLoading}
+              className="px-6 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {deleteLoading ? 'Eliminando...' : 'Eliminar cuenta'}
+            </button>
+          </form>
+        </div>
+      </div>
+    )
   }
 
   const renderGeneralSettings = () => {
@@ -106,14 +498,8 @@ const Configuration = () => {
         return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Configuración de notificaciones</div>
       case 'personalizacion':
         return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Configuración de personalización</div>
-      case 'aplicaciones':
-        return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Aplicaciones y conexiones</div>
-      case 'datos':
-        return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Controles de datos</div>
       case 'seguridad':
-        return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Configuración de seguridad</div>
-      case 'parentales':
-        return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Controles parentales</div>
+        return renderSecuritySettings()
       case 'cuenta':
         return <div className="text-[#6B4AA6] dark:text-[#CFC0E6]">Configuración de cuenta</div>
       default:

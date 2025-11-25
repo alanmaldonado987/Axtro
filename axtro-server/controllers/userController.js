@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import OTP from "../models/OTP.js";
+import Chat from "../models/Chat.js";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import imagekit from '../configs/imageKits.js';
@@ -373,6 +374,224 @@ export const resetPassword = async(req, res) => {
         return res.json({
             success: false,
             message: error.message || "Error al restablecer la contraseña"
+        })
+    }
+}
+
+// API to change email
+export const changeEmail = async(req, res) => {
+    try {
+        const userId = req.user._id
+        const { newEmail, password } = req.body
+
+        if(!newEmail || !password){
+            return res.json({
+                success: false,
+                message: "El nuevo correo y la contraseña son requeridos"
+            })
+        }
+
+        // Validar formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if(!emailRegex.test(newEmail)){
+            return res.json({
+                success: false,
+                message: "El formato del correo electrónico no es válido"
+            })
+        }
+
+        const user = await User.findById(userId)
+
+        if(!user){
+            return res.json({
+                success: false,
+                message: "Usuario no encontrado"
+            })
+        }
+
+        // Verificar que el usuario tenga contraseña (no es OAuth)
+        if(!user.password){
+            return res.json({
+                success: false,
+                message: "Los usuarios registrados con OAuth no pueden cambiar su correo desde aquí"
+            })
+        }
+
+        // Verificar contraseña actual
+        const isMatch = await bcrypt.compare(password, user.password)
+        if(!isMatch){
+            return res.json({
+                success: false,
+                message: "La contraseña actual es incorrecta"
+            })
+        }
+
+        // Verificar si el nuevo email ya existe
+        const emailExists = await User.findOne({ 
+            email: newEmail,
+            _id: { $ne: userId }
+        })
+        
+        if(emailExists){
+            return res.json({
+                success: false,
+                message: "Este correo electrónico ya está en uso"
+            })
+        }
+
+        // Verificar que el nuevo email sea diferente al actual
+        if(user.email === newEmail){
+            return res.json({
+                success: false,
+                message: "El nuevo correo debe ser diferente al actual"
+            })
+        }
+
+        // Actualizar email
+        user.email = newEmail
+        await user.save()
+
+        return res.json({
+            success: true,
+            user,
+            message: "Correo electrónico actualizado correctamente"
+        })
+
+    } catch (error) {
+        console.error('Error al cambiar correo:', error)
+        return res.json({
+            success: false,
+            message: error.message || "Error al cambiar el correo electrónico"
+        })
+    }
+}
+
+// API to change password
+export const changePassword = async(req, res) => {
+    try {
+        const userId = req.user._id
+        const { currentPassword, newPassword } = req.body
+
+        if(!currentPassword || !newPassword){
+            return res.json({
+                success: false,
+                message: "La contraseña actual y la nueva contraseña son requeridas"
+            })
+        }
+
+        if(newPassword.length < 6){
+            return res.json({
+                success: false,
+                message: "La nueva contraseña debe tener al menos 6 caracteres"
+            })
+        }
+
+        const user = await User.findById(userId)
+
+        if(!user){
+            return res.json({
+                success: false,
+                message: "Usuario no encontrado"
+            })
+        }
+
+        // Verificar que el usuario tenga contraseña (no es OAuth)
+        if(!user.password){
+            return res.json({
+                success: false,
+                message: "Los usuarios registrados con OAuth no pueden cambiar su contraseña desde aquí"
+            })
+        }
+
+        // Verificar contraseña actual
+        const isMatch = await bcrypt.compare(currentPassword, user.password)
+        if(!isMatch){
+            return res.json({
+                success: false,
+                message: "La contraseña actual es incorrecta"
+            })
+        }
+
+        // Verificar que la nueva contraseña sea diferente a la actual
+        const isSamePassword = await bcrypt.compare(newPassword, user.password)
+        if(isSamePassword){
+            return res.json({
+                success: false,
+                message: "La nueva contraseña debe ser diferente a la contraseña actual"
+            })
+        }
+
+        // Actualizar contraseña
+        user.password = newPassword
+        await user.save()
+
+        return res.json({
+            success: true,
+            message: "Contraseña actualizada correctamente"
+        })
+
+    } catch (error) {
+        console.error('Error al cambiar contraseña:', error)
+        return res.json({
+            success: false,
+            message: error.message || "Error al cambiar la contraseña"
+        })
+    }
+}
+
+// API to delete user account
+export const deleteAccount = async(req, res) => {
+    try {
+        const userId = req.user._id
+        const { password } = req.body
+
+        const user = await User.findById(userId)
+
+        if(!user){
+            return res.json({
+                success: false,
+                message: "Usuario no encontrado"
+            })
+        }
+
+        // Si el usuario tiene contraseña (no es OAuth), verificar contraseña
+        if(user.password){
+            if(!password){
+                return res.json({
+                    success: false,
+                    message: "La contraseña es requerida para eliminar la cuenta"
+                })
+            }
+
+            // Verificar contraseña
+            const isMatch = await bcrypt.compare(password, user.password)
+            if(!isMatch){
+                return res.json({
+                    success: false,
+                    message: "La contraseña es incorrecta"
+                })
+            }
+        }
+
+        // Eliminar todos los chats del usuario
+        await Chat.deleteMany({ userId: userId.toString() })
+
+        // Eliminar todos los OTPs asociados al email del usuario
+        await OTP.deleteMany({ email: user.email })
+
+        // Eliminar el usuario
+        await User.findByIdAndDelete(userId)
+
+        return res.json({
+            success: true,
+            message: "Cuenta eliminada correctamente"
+        })
+
+    } catch (error) {
+        console.error('Error al eliminar cuenta:', error)
+        return res.json({
+            success: false,
+            message: error.message || "Error al eliminar la cuenta"
         })
     }
 }
