@@ -1,17 +1,11 @@
 import React, { useState } from 'react'
-import { FiSettings, FiBell, FiClock, FiLock, FiUser, FiX, FiChevronDown, FiPlay, FiEye, FiEyeOff } from 'react-icons/fi'
+import { FiSettings, FiBell, FiClock, FiLock, FiUser, FiX, FiPlay, FiEye, FiEyeOff } from 'react-icons/fi'
 import { useAppContext } from '../context/AppContext'
 import { authService } from '../services/authService'
 
 const Configuration = () => {
-  const { navigate, theme, setTheme, user, setUser, fetchUser, logout, notificationSettings, setNotificationSettings, personalizationSettings, updatePersonalization } = useAppContext()
+  const { navigate, theme, setTheme, user, setUser, fetchUser, logout, notificationSettings, setNotificationSettings, personalizationSettings, updatePersonalization, assistantSettings, updateAssistantSettings } = useAppContext()
   const [activeSection, setActiveSection] = useState('general')
-  const [settings, setSettings] = useState({
-    aspecto: 'Sistema',
-    idioma: 'Automático',
-    idiomaHablado: 'Automático',
-    voz: 'Breeze'
-  })
 
   // Estados para cambio de email
   const [emailForm, setEmailForm] = useState({
@@ -248,6 +242,34 @@ const Configuration = () => {
     { id: 'square', label: 'Cuadrado' }
   ]
 
+  const assistantLanguageOptions = [
+    { id: 'auto', label: 'Detectar automáticamente' },
+    { id: 'es', label: 'Español' },
+    { id: 'en', label: 'Inglés' },
+    { id: 'pt', label: 'Portugués' },
+    { id: 'fr', label: 'Francés' }
+  ]
+
+  const toneOptions = [
+    { id: 'cercano', label: 'Cercano' },
+    { id: 'neutral', label: 'Neutro' },
+    { id: 'entusiasta', label: 'Entusiasta' },
+    { id: 'formal', label: 'Formal' }
+  ]
+
+  const speakingStyleOptions = [
+    { id: 'equilibrado', label: 'Equilibrado' },
+    { id: 'resolutivo', label: 'Resolutivo' },
+    { id: 'creativo', label: 'Creativo' },
+    { id: 'mentor', label: 'Mentor' }
+  ]
+
+  const verbosityOptions = [
+    { id: 'conciso', label: 'Conciso' },
+    { id: 'balanceado', label: 'Balanceado' },
+    { id: 'detallado', label: 'Detallado' }
+  ]
+
   const menuItems = [
     { id: 'general', icon: FiSettings, label: 'General' },
     { id: 'notificaciones', icon: FiBell, label: 'Notificaciones' },
@@ -258,13 +280,6 @@ const Configuration = () => {
 
   const handleClose = () => {
     navigate('/')
-  }
-
-  const handleSettingChange = (key, value) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }))
   }
 
   const handleNotificationToggle = (key) => {
@@ -982,54 +997,116 @@ const Configuration = () => {
 
   const renderGeneralSettings = () => {
     return (
-      <div className="space-y-4 sm:space-y-6">
-        {/* Aspecto */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
-          <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Aspecto</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.aspecto}</span>
-            <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
-          </div>
-        </div>
-
-
-        {/* Idioma */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
-          <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Idioma</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.idioma}</span>
-            <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
-          </div>
-        </div>
-
-        {/* Idioma hablado */}
-        <div className="py-3 border-b border-gray-200 dark:border-[#3B2A4F]">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-            <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Idioma hablado</span>
-            <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.idiomaHablado}</span>
-              <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
+      <div className="space-y-6 sm:space-y-8">
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6 space-y-4">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Idioma de respuestas</h3>
+              <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70">Elige en qué idioma prefieres que Axtro responda, sin cambiar la interfaz.</p>
             </div>
           </div>
-          <p className="text-xs text-gray-500 dark:text-[#CFC0E6]/70 mt-2">
-            Para obtener mejores resultados, selecciona el idioma principal. Si no está incluido, podría estar disponible a través de la detección automática.
-          </p>
-        </div>
-
-        {/* Voz */}
-        {/* <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 py-3">
-          <span className="text-sm sm:text-base text-[#1C1426] dark:text-[#E6CCFF] font-medium">Voz</span>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
-            <button className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-lg bg-[#7C3AED] text-white hover:bg-[#6931C9] transition-colors cursor-pointer">
-              <FiPlay className="w-3.5 h-3.5" />
-              <span className="text-xs sm:text-sm font-medium">Reproducir</span>
-            </button>
-            <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm text-[#6B4AA6] dark:text-[#CFC0E6]">{settings.voz}</span>
-              <FiChevronDown className="text-[#6B4AA6] dark:text-[#CFC0E6] w-4 h-4" />
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2 block">Idioma principal</label>
+              <select
+                value={assistantSettings?.responseLanguage}
+                onChange={(e) => updateAssistantSettings({ responseLanguage: e.target.value })}
+                className="w-full px-3 py-2 rounded-xl border border-gray-300 dark:border-[#3B2A4F] bg-white dark:bg-[#2B1B3D] text-sm text-[#1C1426] dark:text-white"
+              >
+                {assistantLanguageOptions.map(option => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-[#1C1426] dark:text-[#E6CCFF] mb-2 block">Temperatura creativa</label>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={assistantSettings?.temperature ?? 0.65}
+                onChange={(e) => updateAssistantSettings({ temperature: parseFloat(e.target.value) })}
+                className="w-full accent-[#7C3AED]"
+              />
+              <p className="text-xs text-gray-500 dark:text-[#CFC0E6]/70 mt-1">
+                {(assistantSettings?.temperature ?? 0.65).toFixed(2)} — valores bajos priorizan precisión, altos fomentan ideas creativas.
+              </p>
             </div>
           </div>
-        </div> */}
+        </div>
+
+        <div className="border border-gray-200 dark:border-[#3B2A4F] rounded-2xl p-4 sm:p-6 space-y-6">
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <h3 className="text-lg font-semibold text-[#1C1426] dark:text-[#E6CCFF]">Configuraciones de la IA</h3>
+              <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70">Define cómo quieres que se exprese Axtro en cada proyecto.</p>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mb-2">Tono y actitud</p>
+            <div className="flex flex-wrap gap-2">
+              {toneOptions.map(option => {
+                const isActive = assistantSettings?.tone === option.id
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => updateAssistantSettings({ tone: option.id })}
+                    className={`px-4 py-2 rounded-full border text-sm font-medium transition ${isActive ? 'bg-[#7C3AED] text-white border-[#7C3AED]' : 'border-gray-300 dark:border-[#3B2A4F] text-[#4C1D95] dark:text-white'}`}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mb-2">Modo de colaboración</p>
+            <div className="grid sm:grid-cols-2 gap-2">
+              {speakingStyleOptions.map(option => {
+                const isActive = assistantSettings?.speakingStyle === option.id
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => updateAssistantSettings({ speakingStyle: option.id })}
+                    className={`p-3 rounded-2xl border text-left transition ${isActive ? 'border-[#7C3AED] bg-[#F5EDFF]' : 'border-gray-200 dark:border-[#3B2A4F] hover:border-[#CBB5FF]'}`}
+                  >
+                    <p className="font-medium text-[#1C1426] dark:text-white">{option.label}</p>
+                    <p className="text-xs text-gray-500 dark:text-[#CFC0E6]/70 mt-1">
+                      {option.id === 'equilibrado' && 'Balance entre análisis y ejecución.'}
+                      {option.id === 'resolutivo' && 'Prioriza decisiones y siguientes pasos.'}
+                      {option.id === 'creativo' && 'Explora rutas alternativas e ideas nuevas.'}
+                      {option.id === 'mentor' && 'Explica con calma y ofrece referencias.'}
+                    </p>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mb-2">Nivel de detalle</p>
+            <div className="flex flex-wrap gap-2">
+              {verbosityOptions.map(option => {
+                const isActive = assistantSettings?.verbosity === option.id
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => updateAssistantSettings({ verbosity: option.id })}
+                    className={`px-4 py-2 rounded-full border text-sm font-medium transition ${isActive ? 'bg-[#7C3AED] text-white border-[#7C3AED]' : 'border-gray-300 dark:border-[#3B2A4F] text-[#4C1D95] dark:text-white'}`}
+                  >
+                    {option.label}
+                  </button>
+                )
+              })}
+            </div>
+            <p className="text-xs text-gray-500 dark:text-[#CFC0E6]/70 mt-2">
+              Define si prefieres respuestas ultra sintetizadas o explicaciones completas con contexto.
+            </p>
+          </div>
+        </div>
       </div>
     )
   }

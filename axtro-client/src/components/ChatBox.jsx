@@ -29,7 +29,7 @@ const ChatBox = () => {
   const selectedChatIdRef = useRef(null)
   const audioContextRef = useRef(null)
 
-  const { selectedChat, setChats, setSelectedChat, fetchUserChats, notificationSettings, pushNotification, personalizationSettings } = useAppContext()
+  const { selectedChat, setChats, setSelectedChat, fetchUserChats, notificationSettings, pushNotification, personalizationSettings, assistantSettings } = useAppContext()
   const location = useLocation()
   const messages = selectedChat?.messages || []
 
@@ -152,8 +152,8 @@ const ChatBox = () => {
 
     try {
       const response = mode === 'imagen'
-        ? await messageService.sendImageMessage(chatId, userMessage.content, isPublished, signal)
-        : await messageService.sendTextMessage(chatId, userMessage.content, signal)
+        ? await messageService.sendImageMessage(chatId, userMessage.content, isPublished, assistantSettings, signal)
+        : await messageService.sendTextMessage(chatId, userMessage.content, assistantSettings, signal)
 
       if (response.success && response.reply) {
         appendMessagesToChat(chatId, [response.reply])

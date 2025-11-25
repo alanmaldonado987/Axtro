@@ -152,6 +152,14 @@ const defaultPersonalization = {
     showAssistantLabel: true
 }
 
+const defaultAssistantSettings = {
+    responseLanguage: 'auto',
+    speakingStyle: 'equilibrado',
+    tone: 'cercano',
+    temperature: 0.65,
+    verbosity: 'balanceado'
+}
+
 const AppContext = createContext()
 export const AppContextProvider = ({ children }) => {
 
@@ -169,6 +177,7 @@ export const AppContextProvider = ({ children }) => {
         emailUpdates: false
     })
     const [personalizationSettings, setPersonalizationSettings] = useState(defaultPersonalization)
+    const [assistantSettings, setAssistantSettings] = useState(defaultAssistantSettings)
     const [toast, setToast] = useState(null)
 
     const fetchUser = async () => {
@@ -244,6 +253,11 @@ export const AppContextProvider = ({ children }) => {
                     if(storedPersonalization){
                         setPersonalizationSettings({ ...defaultPersonalization, ...JSON.parse(storedPersonalization) })
                     }
+
+                    const storedAssistant = localStorage.getItem(`assistantSettings_${userId}`)
+                    if(storedAssistant){
+                        setAssistantSettings({ ...defaultAssistantSettings, ...JSON.parse(storedAssistant) })
+                    }
                 }
             }catch(error){
                 console.error('Error al cargar configuraciones del usuario:', error)
@@ -257,6 +271,7 @@ export const AppContextProvider = ({ children }) => {
                 emailUpdates: false
             })
             setPersonalizationSettings(defaultPersonalization)
+            setAssistantSettings(defaultAssistantSettings)
         }
     }, [user, fetchUserChats])
 
@@ -288,6 +303,16 @@ export const AppContextProvider = ({ children }) => {
             console.error('Error al guardar personalizationSettings:', error)
         }
     }, [personalizationSettings, user])
+
+    useEffect(()=>{
+        if(!user?._id && !user?.id) return
+        try{
+            const userId = user._id || user.id
+            localStorage.setItem(`assistantSettings_${userId}`, JSON.stringify(assistantSettings))
+        }catch(error){
+            console.error('Error al guardar assistantSettings:', error)
+        }
+    }, [assistantSettings, user])
 
     useEffect(()=>{
         const palette = accentPalettes[personalizationSettings.accentPreset] || accentPalettes.violet
@@ -349,6 +374,13 @@ export const AppContextProvider = ({ children }) => {
         }))
     }
 
+    const updateAssistantSettings = (changes) => {
+        setAssistantSettings(prev => ({
+            ...prev,
+            ...changes
+        }))
+    }
+
     const value = {
         navigate,
         user,
@@ -368,6 +400,8 @@ export const AppContextProvider = ({ children }) => {
         setIsInformationOpen,
         notificationSettings,
         setNotificationSettings,
+        assistantSettings,
+        updateAssistantSettings,
         toast,
         pushNotification,
         clearToast,
