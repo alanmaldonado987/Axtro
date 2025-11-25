@@ -219,7 +219,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
               </div>
               <img
                 src={assets.bin_icon}
-                className='hidden group-hover:block w-4 cursor-pointer not-dark:invert opacity-70 hover:opacity-100'
+                className='block md:hidden md:group-hover:block w-4 cursor-pointer not-dark:invert opacity-70 hover:opacity-100'
                 alt="Eliminar chat"
                 title="Eliminar chat"
                 onClick={(e)=>handleDeleteChat(e, chat._id)}
