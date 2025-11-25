@@ -132,7 +132,7 @@ const ChatBox = () => {
         const isViewingChat = location.pathname === '/' && selectedChatIdRef.current === chatId && !document.hidden
         if (notificationSettings?.newMessageAlerts && !isViewingChat) {
           pushNotification({
-            title: 'Axtro ya respondió',
+            title: 'Axtro respondió',
             message: `Hay una nueva respuesta en "${chatName}".`,
             actionLabel: 'Ver chat',
             chatId
