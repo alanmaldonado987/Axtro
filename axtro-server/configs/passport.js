@@ -30,8 +30,7 @@ const getGoogleCallbackURL = () => {
     if (process.env.GOOGLE_CALLBACK_URL) {
         return process.env.GOOGLE_CALLBACK_URL;
     }
-    const serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
-    // Asegurarse de que la URL no termine con /
+    const serverUrl = process.env.SERVER_URL;
     const baseUrl = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
     return `${baseUrl}/api/auth/google/callback`;
 };
@@ -42,7 +41,6 @@ passport.use(new GoogleStrategy({
     callbackURL: getGoogleCallbackURL()
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        // Buscar si el usuario ya existe
         let user = await User.findOne({ 
             $or: [
                 { email: profile.emails[0].value },
@@ -51,7 +49,6 @@ passport.use(new GoogleStrategy({
         });
 
         if (user) {
-            // Si existe pero no tiene provider, actualizarlo
             if (!user.provider) {
                 user.provider = 'google';
                 user.providerId = profile.id;
@@ -63,7 +60,6 @@ passport.use(new GoogleStrategy({
             return done(null, user);
         }
 
-        // Crear nuevo usuario
         user = await User.create({
             name: profile.displayName || profile.name.givenName + ' ' + profile.name.familyName,
             email: profile.emails[0].value,
@@ -84,8 +80,7 @@ const getFacebookCallbackURL = () => {
     if (process.env.FACEBOOK_CALLBACK_URL) {
         return process.env.FACEBOOK_CALLBACK_URL;
     }
-    const serverUrl = process.env.SERVER_URL || 'http://localhost:3000';
-    // Asegurarse de que la URL no termine con /
+    const serverUrl = process.env.SERVER_URL;
     const baseUrl = serverUrl.endsWith('/') ? serverUrl.slice(0, -1) : serverUrl;
     return `${baseUrl}/api/auth/facebook/callback`;
 };
@@ -99,7 +94,6 @@ passport.use(new FacebookStrategy({
     try {
         const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
         
-        // Buscar si el usuario ya existe
         let user = null;
         
         if (email) {
@@ -111,7 +105,6 @@ passport.use(new FacebookStrategy({
         }
 
         if (user) {
-            // Si existe pero no tiene provider, actualizarlo
             if (!user.provider) {
                 user.provider = 'facebook';
                 user.providerId = profile.id;
@@ -123,10 +116,8 @@ passport.use(new FacebookStrategy({
             return done(null, user);
         }
 
-        // Si no hay email, generar uno único
         const userEmail = email || `facebook_${profile.id}@axtro.app`;
 
-        // Crear nuevo usuario
         user = await User.create({
             name: profile.displayName || `Usuario Facebook ${profile.id}`,
             email: userEmail,

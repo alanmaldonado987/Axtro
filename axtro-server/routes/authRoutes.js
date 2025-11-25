@@ -17,14 +17,14 @@ authRouter.get('/google',
 );
 
 authRouter.get('/google/callback',
-    passport.authenticate('google', { session: false, failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=google_failed` }),
+    passport.authenticate('google', { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=google_failed` }),
     (req, res) => {
         try {
             const token = generateToken(req.user._id);
-            // Redirigir al frontend con el token
-            res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/auth/callback?token=${token}&success=true`);
+
+            res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}&success=true`);
         } catch (error) {
-            res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=token_generation_failed`);
+            res.redirect(`${process.env.CLIENT_URL}/login?error=token_generation_failed`);
         }
     }
 );
@@ -35,14 +35,14 @@ authRouter.get('/facebook',
 );
 
 authRouter.get('/facebook/callback',
-    passport.authenticate('facebook', { session: false, failureRedirect: `${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=facebook_failed` }),
+    passport.authenticate('facebook', { session: false, failureRedirect: `${process.env.CLIENT_URL}/login?error=facebook_failed` }),
     (req, res) => {
         try {
             const token = generateToken(req.user._id);
-            // Redirigir al frontend con el token
-            res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/auth/callback?token=${token}&success=true`);
+
+            res.redirect(`${process.env.CLIENT_URL}/auth/callback?token=${token}&success=true`);
         } catch (error) {
-            res.redirect(`${process.env.CLIENT_URL || 'http://localhost:5173'}/login?error=token_generation_failed`);
+            res.redirect(`${process.env.CLIENT_URL}/login?error=token_generation_failed`);
         }
     }
 );
