@@ -276,7 +276,7 @@ const Sidebar = ({ isMenuOpen, setIsMenuOpen }) => {
           <p className='flex-1 text-sm text-[#4C1D95] dark:text-[#E6CCFF] truncate'>{user ? user.name : 'Login your account'}</p>
           { user && <img 
             src={assets.logout_icon} 
-            className='h-5 cursor-pointer not-dark:invert hover:opacity-70 transition-opacity' 
+            className='h-5 cursor-pointer not-dark:invert hover:opacity-70 transition-opacity'
             alt="Cerrar sesión"
             onClick={(e) => {
               e.stopPropagation();

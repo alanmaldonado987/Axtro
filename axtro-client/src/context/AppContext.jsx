@@ -168,7 +168,7 @@ export const AppContextProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [chats, setChats] = useState([]);
     const [selectedChat, setSelectedChat] = useState(null);
-    const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
+    const [theme, setTheme] = useState('light');
     const [loading, setLoading] = useState(true);
     const [chatsLoading, setChatsLoading] = useState(false);
     const [isInformationOpen, setIsInformationOpen] = useState(false);
@@ -258,6 +258,13 @@ export const AppContextProvider = ({ children }) => {
                     if(storedAssistant){
                         setAssistantSettings({ ...defaultAssistantSettings, ...JSON.parse(storedAssistant) })
                     }
+
+                    const storedTheme = localStorage.getItem(`theme_${userId}`)
+                    if(storedTheme){
+                        setTheme(storedTheme)
+                    } else {
+                        setTheme('light')
+                    }
                 }
             }catch(error){
                 console.error('Error al cargar configuraciones del usuario:', error)
@@ -272,6 +279,7 @@ export const AppContextProvider = ({ children }) => {
             })
             setPersonalizationSettings(defaultPersonalization)
             setAssistantSettings(defaultAssistantSettings)
+            setTheme('light')
         }
     }, [user, fetchUserChats])
 
@@ -281,8 +289,17 @@ export const AppContextProvider = ({ children }) => {
         }else{
             document.documentElement.classList.remove('dark');
         }
-        localStorage.setItem('theme', theme)
     }, [theme])
+
+    useEffect(()=>{
+        if(!user?._id && !user?.id) return
+        try{
+            const userId = user._id || user.id
+            localStorage.setItem(`theme_${userId}`, theme)
+        }catch(error){
+            console.error('Error al guardar theme:', error)
+        }
+    }, [theme, user])
 
     useEffect(()=>{
         if(!user?._id && !user?.id) return
