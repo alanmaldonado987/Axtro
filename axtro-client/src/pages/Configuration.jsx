@@ -302,7 +302,6 @@ const Configuration = () => {
     })
   }
 
-  // Manejar cambio de email
   const handleEmailChange = async (e) => {
     e.preventDefault()
     setEmailError('')
@@ -319,7 +318,6 @@ const Configuration = () => {
       if (response.success) {
         setEmailSuccess('Correo electrónico actualizado correctamente')
         setEmailForm({ newEmail: '', password: '' })
-        // Actualizar usuario en el contexto
         if (response.user) {
           setUser(response.user)
         } else {
@@ -336,7 +334,6 @@ const Configuration = () => {
     }
   }
 
-  // Manejar cambio de contraseña
   const handlePasswordChange = async (e) => {
     e.preventDefault()
     setPasswordError('')
@@ -374,32 +371,28 @@ const Configuration = () => {
     }
   }
 
-  // Manejar eliminación de cuenta
   const handleDeleteAccount = async (e) => {
     e.preventDefault()
     setDeleteError('')
 
     const isOAuthUser = user?.provider
 
-    // Para usuarios OAuth, solo requiere confirmación de texto
+    // Prevenir eliminación si la cuenta está vinculada con OAuth
     if (isOAuthUser) {
-      if (deleteForm.confirmText !== 'ELIMINAR') {
-        setDeleteError('Por favor escribe "ELIMINAR" para confirmar')
-        return
-      }
-    } else {
-      // Para usuarios normales, requiere contraseña y confirmación
-      if (!deleteForm.password || deleteForm.confirmText !== 'ELIMINAR') {
-        setDeleteError('Por favor completa todos los campos correctamente')
-        return
-      }
+      setDeleteError(`Tu cuenta está vinculada con ${user.provider === 'google' ? 'Google' : 'Facebook'}. No puedes eliminar tu cuenta desde aquí.`)
+      return
+    }
+
+    // Para usuarios normales, requiere contraseña y confirmación
+    if (!deleteForm.password || deleteForm.confirmText !== 'ELIMINAR') {
+      setDeleteError('Por favor completa todos los campos correctamente')
+      return
     }
 
     setDeleteLoading(true)
     try {
       const response = await authService.deleteAccount(deleteForm.password || null)
       if (response.success) {
-        // Cerrar sesión y redirigir
         logout()
         navigate('/login?message=account_deleted')
       } else {
@@ -603,8 +596,10 @@ const Configuration = () => {
             Eliminar cuenta
           </h3>
           <p className="text-sm text-gray-600 dark:text-[#CFC0E6]/70 mb-4">
-            Esta acción es permanente e irreversible. Se eliminarán todos tus datos, chats y configuraciones. 
-            {!isOAuthUser && ' Se requiere tu contraseña para confirmar.'}
+            {isOAuthUser 
+              ? `Tu cuenta está vinculada con ${user.provider === 'google' ? 'Google' : 'Facebook'}. No puedes eliminar tu cuenta desde aquí. Si deseas eliminar tu cuenta, debes hacerlo desde tu cuenta de ${user.provider === 'google' ? 'Google' : 'Facebook'}.`
+              : 'Esta acción es permanente e irreversible. Se eliminarán todos tus datos, chats y configuraciones. Se requiere tu contraseña para confirmar.'
+            }
           </p>
 
           <form onSubmit={handleDeleteAccount} className="space-y-4">
@@ -620,12 +615,13 @@ const Configuration = () => {
                     onChange={(e) => setDeleteForm({ ...deleteForm, password: e.target.value })}
                     className="w-full px-4 py-2 pr-10 rounded-lg border border-red-300 dark:border-red-700 bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-600"
                     placeholder="Ingresa tu contraseña"
-                    disabled={deleteLoading}
+                    disabled={deleteLoading || isOAuthUser}
                   />
                   <button
                     type="button"
                     onClick={() => setShowDeletePassword(!showDeletePassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-[#CFC0E6] hover:text-red-600 dark:hover:text-red-400"
+                    disabled={isOAuthUser}
                   >
                     {showDeletePassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                   </button>
@@ -641,9 +637,9 @@ const Configuration = () => {
                 type="text"
                 value={deleteForm.confirmText}
                 onChange={(e) => setDeleteForm({ ...deleteForm, confirmText: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-red-300 dark:border-red-700 bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-600"
+                className="w-full px-4 py-2 rounded-lg border border-red-300 dark:border-red-700 bg-white dark:bg-[#2B1B3D] text-[#1C1426] dark:text-[#E6CCFF] focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 placeholder="ELIMINAR"
-                disabled={deleteLoading}
+                disabled={deleteLoading || isOAuthUser}
               />
             </div>
 
@@ -655,7 +651,7 @@ const Configuration = () => {
 
             <button
               type="submit"
-              disabled={deleteLoading}
+              disabled={deleteLoading || isOAuthUser}
               className="px-6 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             >
               {deleteLoading ? 'Eliminando...' : 'Eliminar cuenta'}
